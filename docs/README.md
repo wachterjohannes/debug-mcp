@@ -24,3 +24,30 @@ The easiest way is to create a folder next to your `src` and `test` directory. A
 ## Configuration
 
 Explain how we add 3rd party tools and local tools.
+
+## Commands
+
+### Init
+
+```bash
+vendor/bin/mcp init
+```
+
+### Run server
+
+```bash
+vendor/bin/mcp serve
+```
+
+### Discovery more mcp features
+
+```bash
+vendor/bin/mcp discover
+```
+
+### Clear cache
+
+```bash
+vendor/bin/mcp clear-cache
+```
+
