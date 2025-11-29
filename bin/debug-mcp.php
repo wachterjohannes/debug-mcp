@@ -22,6 +22,7 @@ foreach ($autoloadPaths as $autoloadPath) {
         if (file_exists($root . '/.mcp.php')) {
             $userConfig = include $root . '/.mcp.php';
         }
+
         break;
     }
 }
@@ -29,7 +30,10 @@ foreach ($autoloadPaths as $autoloadPath) {
 $config = include dirname(__DIR__).'/src/default.config.php';
 
 use Wachterjohannes\DebugMcp\App;
+use Wachterjohannes\DebugMcp\Model\Configuration;
+
+$config = new Configuration(array_merge(['rootDir' => $root], $config, $userConfig));
 
 // Create and run server
-$app = App::build(array_merge(['rootDir'=>$root], $config, $userConfig));
+$app = App::build($config);
 $app->run();

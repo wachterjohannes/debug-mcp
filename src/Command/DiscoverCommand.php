@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Wachterjohannes\DebugMcp\Command;
 
 use Symfony\Component\Console\Command\Command;
@@ -8,7 +10,7 @@ use Symfony\Component\Console\Command\Command;
  * Look at the vendor directory and ask if we should add some
  * MCP tools/features etc to our config
  */
-class AutoDiscoverCommand extends Command
+class DiscoverCommand extends Command
 {
     public static function getDefaultName(): ?string
     {
