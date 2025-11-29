@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Wachterjohannes\DebugMcp;
 
-use PhpMcp\Server\Server as McpServer;
-use PhpMcp\Server\Transports\StdioServerTransport;
+use Mcp\Server as McpServer;
+use Mcp\Server\Transport\StdioTransport;
 use Wachterjohannes\DebugMcp\Discovery\DiscoveryManager;
 
 /**
@@ -37,35 +37,29 @@ class Server
      */
     public function run(): void
     {
-        // Initialize MCP server
-        $this->mcpServer = new McpServer(
-            name: 'debug-mcp',
-            version: '0.1.0'
+        // Build MCP server
+        $builder = McpServer::builder()
+            ->setServerInfo('debug-mcp', '0.1.0', 'Extensible MCP server for PHP development');
+
+        // Add discovery loader to scan for tools/resources/prompts
+        // This will scan vendor packages and local mcp/ directory
+        $basePath = dirname(__DIR__);
+        $builder->addLoaders(
+            new \Mcp\Capability\Registry\Loader\DiscoveryLoader(
+                basePath: $basePath,
+                scanDirs: ['mcp', 'vendor'],
+                excludeDirs: ['tests', 'var', 'public'],
+                logger: new \Psr\Log\NullLogger(),
+            )
         );
 
-        // Discover all extension classes
-        $extensionClasses = $this->discoveryManager->discover();
+        // Build the server
+        $this->mcpServer = $builder->build();
 
-        // Instantiate extension classes (they auto-register via attributes)
-        foreach ($extensionClasses as $className) {
-            if (! class_exists($className)) {
-                error_log("Warning: Class {$className} not found, skipping.");
-
-                continue;
-            }
-
-            try {
-                $instance = new $className();
-                $this->mcpServer->registerInstance($instance);
-            } catch (\Throwable $e) {
-                error_log("Error instantiating {$className}: " . $e->getMessage());
-            }
-        }
-
-        // Create stdio transport for JSON-RPC communication
-        $transport = new StdioServerTransport();
+        // Create stdio transport and run server
+        $transport = new StdioTransport();
 
         // Start listening (blocks until stdin EOF)
-        $this->mcpServer->listen($transport);
+        $this->mcpServer->run($transport);
     }
 }

@@ -1,35 +1,35 @@
 {
-    "name": "wachterjohannes/debug-mcp",
-    "description": "Core extensible MCP server implementation in PHP with plugin architecture",
-    "type": "library",
-    "license": "MIT",
-    "authors": [
-        {
-            "name": "Johannes Wachter",
-            "email": "johannes@wachter.cloud"
-        }
-    ],
-    "require": {
-        "php": "^8.1",
-        "php-mcp/server": "*"
-    },
-    "require-dev": {
-        "friendsofphp/php-cs-fixer": "^3.0"
-    },
-    "autoload": {
-        "psr-4": {
-            "Wachterjohannes\\DebugMcp\\": "src/"
-        }
-    },
-    "extra": {
-        "wachterjohannes/debug-mcp": {
-            "classes": []
-        }
-    },
-    "bin": [
-        "bin/debug-mcp"
-    ],
-    "scripts": {
-        "cs-fix": "php-cs-fixer fix"
+  "name": "wachterjohannes/debug-mcp",
+  "description": "Core extensible MCP server implementation in PHP with plugin architecture",
+  "type": "library",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Johannes Wachter",
+      "email": "johannes@wachter.cloud"
     }
+  ],
+  "require": {
+    "php": "^8.1",
+    "mcp/sdk": "^0.1.0"
+  },
+  "require-dev": {
+    "friendsofphp/php-cs-fixer": "^3.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "Wachterjohannes\\DebugMcp\\": "src/"
+    }
+  },
+  "extra": {
+    "wachterjohannes/debug-mcp": {
+      "classes": []
+    }
+  },
+  "bin": [
+    "bin/debug-mcp"
+  ],
+  "scripts": {
+    "cs-fix": "php-cs-fixer fix"
+  }
 }
