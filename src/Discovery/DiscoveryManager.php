@@ -23,9 +23,9 @@ class DiscoveryManager
         ?LocalDiscovery $localDiscovery = null,
         ?string $rootDir = null
     ) {
-        $this->composerDiscovery = $composerDiscovery ?? new ComposerDiscovery();
-        $this->localDiscovery = $localDiscovery ?? new LocalDiscovery();
-        $this->rootDir = $rootDir ?? dirname(__DIR__, 2);
+        $this->rootDir = $rootDir ?? getcwd();
+        $this->composerDiscovery = $composerDiscovery ?? new ComposerDiscovery($this->rootDir . '/vendor');
+        $this->localDiscovery = $localDiscovery ?? new LocalDiscovery($this->rootDir . '/mcp');
     }
 
     /**

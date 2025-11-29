@@ -223,7 +223,7 @@ This SDK is experimental (pre-v1.0) but official from Anthropic/Symfony:
 The SDK uses PHP reflection to find attributes:
 
 ```php
-use PhpMcp\Server\Attributes\McpTool;
+use Mcp\Capability\Attribute\McpTool;
 
 class MyTool
 {

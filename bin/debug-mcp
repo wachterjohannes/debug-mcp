@@ -10,15 +10,21 @@ declare(strict_types=1);
  */
 
 // Autoload dependencies
-$autoloadPaths = [
-    __DIR__ . '/../vendor/autoload.php',
-    __DIR__ . '/../../../autoload.php',
-];
+// Use the composer proxy's autoload path if available (set by vendor/bin proxy)
+// Otherwise try to find the right autoloader
+if (isset($GLOBALS['_composer_autoload_path'])) {
+    require_once $GLOBALS['_composer_autoload_path'];
+} else {
+    $autoloadPaths = [
+        __DIR__ . '/../../../autoload.php',  // Project autoloader (preferred)
+        __DIR__ . '/../vendor/autoload.php', // Package autoloader (fallback)
+    ];
 
-foreach ($autoloadPaths as $autoloadPath) {
-    if (file_exists($autoloadPath)) {
-        require_once $autoloadPath;
-        break;
+    foreach ($autoloadPaths as $autoloadPath) {
+        if (file_exists($autoloadPath)) {
+            require_once $autoloadPath;
+            break;
+        }
     }
 }
 

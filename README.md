@@ -101,7 +101,7 @@ For rapid prototyping, add PHP files directly to the `mcp/` directory:
 <?php
 namespace Local;
 
-use PhpMcp\Server\Attributes\McpTool;
+use Mcp\Capability\Attribute\McpTool;
 
 class MyTool
 {
