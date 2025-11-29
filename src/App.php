@@ -21,7 +21,7 @@ class App
 
         self::addCommand($application, new InitCommand($config));
         self::addCommand($application, new ServeCommand($logger, $config));
-        self::addCommand($application, new DiscoverCommand());
+        self::addCommand($application, new DiscoverCommand($config));
 
         return $application;
     }
