@@ -1,0 +1,29 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+/**
+ * debug-mcp entry point
+ *
+ * Starts the MCP server with stdio transport for JSON-RPC communication.
+ */
+
+// Autoload dependencies
+$autoloadPaths = [
+    __DIR__ . '/../vendor/autoload.php',
+    __DIR__ . '/../../../autoload.php',
+];
+
+foreach ($autoloadPaths as $autoloadPath) {
+    if (file_exists($autoloadPath)) {
+        require_once $autoloadPath;
+        break;
+    }
+}
+
+use Wachterjohannes\DebugMcp\Server;
+
+// Create and run server
+$server = new Server();
+$server->run();

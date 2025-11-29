@@ -1,11 +1,17 @@
 {
     "name": "wachterjohannes/debug-mcp",
-    "description": "Extensible MCP server for PHP development with multi-source discovery mechanism",
-    "type": "project",
+    "description": "Core extensible MCP server implementation in PHP with plugin architecture",
+    "type": "library",
     "license": "MIT",
+    "authors": [
+        {
+            "name": "Johannes Wachter",
+            "email": "johannes@wachter.cloud"
+        }
+    ],
     "require": {
         "php": "^8.1",
-        "modelcontextprotocol/php-sdk": "^0.1"
+        "php-mcp/server": "*"
     },
     "require-dev": {
         "friendsofphp/php-cs-fixer": "^3.0"
@@ -20,7 +26,9 @@
             "classes": []
         }
     },
-    "bin": ["bin/debug-mcp"],
+    "bin": [
+        "bin/debug-mcp"
+    ],
     "scripts": {
         "cs-fix": "php-cs-fixer fix"
     }
