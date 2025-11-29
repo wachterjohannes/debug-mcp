@@ -36,23 +36,11 @@ class ServeCommand extends Command
         $container = new Container();
         $container->set(LoggerInterface::class, $this->logger);
         $cacheDir = $this->config->get('cacheDir');
-        $rootDir = $this->config->get('rootDir');
-
-        $scanDirs = array_filter(array_map(function ($item) use ($rootDir) {
-            if (! is_dir($rootDir.'/vendor/'.$item)) {
-                $this->logger->error('Plugin "'.$item.'" not found');
-                return null;
-            }
-
-            return 'vendor/'.$item;
-
-        }, $this->config->get('enabled_plugins')));
-        $scanDirs[] = substr(dirname(__DIR__, 2) . '/mcp', strlen($rootDir));
 
         $server = Server::builder()
             ->setServerInfo('debug-mcp', '0.1.1', 'Extensible MCP server for PHP development')
             ->setContainer($container)
-            ->setDiscovery(basePath: $rootDir, scanDirs: $scanDirs)
+            ->setDiscovery(basePath: $this->config->get('rootDir'), scanDirs: $this->getDirectoriesToScan())
             ->setSession(new FileSessionStore($cacheDir.'/sessions'))
             ->setLogger($this->logger)
             ->build();
@@ -61,6 +49,36 @@ class ServeCommand extends Command
         $server->run(new StdioTransport());
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @return string[]
+     */
+    private function getDirectoriesToScan(): array
+    {
+        $rootDir = $this->config->get('rootDir');
+        $scanDirs = array_filter(array_map(function ($item) use ($rootDir) {
+            if (! is_dir($rootDir . '/vendor/' . $item)) {
+                $this->logger->error('Plugin "' . $item . '" not found');
+
+                return null;
+            }
+
+            return 'vendor/' . $item;
+
+        }, $this->config->get('enabled_plugins')));
+
+        foreach ($this->config->get('scanDir') as $dir) {
+            $dir = trim($dir);
+            if (is_string($dir) && '' !== $dir) {
+                $scanDirs[] = $dir;
+            }
+        }
+
+        // '/mcp' here refers to this project's MCP features
+        $scanDirs[] = substr(dirname(__DIR__, 2) . '/mcp', strlen($rootDir));
+
+        return $scanDirs;
     }
 
 }
