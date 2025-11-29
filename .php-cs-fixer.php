@@ -3,7 +3,6 @@
 $finder = PhpCsFixer\Finder::create()
     ->in(__DIR__ . '/src')
     ->in(__DIR__ . '/bin')
-    ->in(__DIR__ . '/mcp')
     ->name('*.php')
     ->ignoreDotFiles(true)
     ->ignoreVCS(true);
