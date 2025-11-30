@@ -11,22 +11,25 @@
 
 namespace Symfony\AI\Mate\Command;
 
+use Psr\Log\LoggerInterface;
+use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
 use Symfony\AI\Mate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Finder\Finder;
-use Symfony\Component\Finder\SplFileInfo;
 
 /**
- * Look at the vendor directory and ask if we should add some
- * MCP tools/features etc to our config.
+ * Discover MCP extensions installed via Composer.
+ *
+ * Scans for packages with type "ai-mate-extension"
+ * and suggests adding them to the enabled_plugins configuration.
  */
 class DiscoverCommand extends Command
 {
     public function __construct(
         private Configuration $config,
+        private LoggerInterface $logger,
     ) {
         parent::__construct(self::getDefaultName());
     }
@@ -40,29 +43,37 @@ class DiscoverCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $root = $this->config->rootDir;
-        $finder = (new Finder())
-            ->in($root.'/vendor')
-            ->name('*.php')
-            ->exclude(['composer', 'bin', 'mcp/sdk']);
+        $discovery = new ComposerTypeDiscovery($this->config->rootDir, $this->logger);
 
-        $packages = [];
-        foreach ($finder as $file) {
-            $this->processFile($file, $packages);
-        }
+        // Discover all extensions, regardless of whitelist
+        $extensions = $discovery->discover([]);
 
-        $count = \count($packages);
+        $count = \count($extensions);
         if (0 === $count) {
-            $io->warning('No packages found with MCP features.');
+            $io->warning('No MCP extensions found. Packages must have type "ai-mate-extension" in composer.json.');
 
             return Command::SUCCESS;
         }
-        $io->success('Discovered '.$count.' packages with MCP features. Please add them to your .mcp.php config file.');
 
-        $content = implode("',\n        '", array_keys($packages));
+        $io->success(\sprintf('Discovered %d MCP extension%s.', $count, 1 === $count ? '' : 's'));
+        $io->writeln('');
+
+        $io->section('Discovered Extensions');
+        foreach ($extensions as $packageName => $scanDirs) {
+            $io->writeln(\sprintf('  • <info>%s</info>', $packageName));
+            foreach ($scanDirs as $dir) {
+                $io->writeln(\sprintf('    └─ %s', $dir));
+            }
+        }
+
+        $io->writeln('');
+        $io->section('Configuration');
+        $io->writeln('Add these packages to your .mcp.php config file:');
+        $io->writeln('');
+
+        $content = implode("',\n        '", array_keys($extensions));
 
         $io->writeln('// .mcp.php');
-        $io->writeln('');
         $io->writeln(<<<PHP
 return [
     // ...
@@ -74,31 +85,5 @@ return [
 PHP);
 
         return Command::SUCCESS;
-    }
-
-    /**
-     * @param array<string, string[]> $packages
-     */
-    private function processFile(SplFileInfo $file, array &$packages): void
-    {
-        $content = file_get_contents($file->getPathname());
-        if (false === $content) {
-            return;
-        }
-
-        // TODO make this better and more dynamic
-        if (str_contains($content, 'Mcp\Capability\Attribute')) {
-            $parts = explode(\DIRECTORY_SEPARATOR, $file->getRelativePath());
-
-            if (\count($parts) < 2) {
-                return;
-            }
-
-            $package = $parts[0].'/'.$parts[1];
-            if (!isset($packages[$package])) {
-                $packages[$package] = [];
-            }
-            $packages[$package][] = $file->getRelativePathname();
-        }
     }
 }
