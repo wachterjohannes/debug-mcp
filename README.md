@@ -1,4 +1,4 @@
-# AI Mate
+# Symfony AI - AI Mate
 
 Framework agnostic platform for [Model Context Protocol](https://modelcontextprotocol.io) server to integrate with your AI coding assistant.
 
@@ -12,9 +12,9 @@ Supports MCP capabilities (tools, prompts, resources) as server via STDIO transp
 composer require symfony/ai-mate
 ```
 
-This repository is a **READ-ONLY** sub-tree split. See https://github.com/symfony/symfony to create issues or submit pull requests.
+This repository is a **READ-ONLY** sub-tree split. See https://github.com/symfony/ai to create issues or submit pull requests.
 
 ## Resources
 
 * [Documentation](docs/README.md)
-* [Report issues](https://github.com/symfony/symfony/issues) and [send Pull Requests](https://github.com/symfony/symfony/pulls) in the [main Symfony repository](https://github.com/symfony/symfony)
+* [Report issues](https://github.com/symfony/ai/issues) and [send Pull Requests](https://github.com/symfony/ai/pulls) in the [main Symfony repository](https://github.com/symfony/ai)

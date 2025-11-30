@@ -1,38 +1,36 @@
-# AI Mate Component
+# AGENTS.md
 
-MCP server implementation for Symfony applications. Enables AI assistants to interact with Symfony projects through tools, resources, and prompts.
+AI agent guidance for the Chat component.
+
+## Component Overview
+
+AI mate is a guidance document for the AI Mate component, designed for use with Claude Code and other Coding Agents.
+
+This component provides an MCP (Model Context Protocol) server implementation that enables AI coding assistants to interact with your development environment through tools, resources, and prompts.
 
 ## Architecture
 
 ### Core Classes
 
-- **`App`**: Symfony Console application builder for MCP server
-- **`Command\ServeCommand`**: Starts MCP server with STDIO transport
-- **`Command\InitCommand`**: Initializes `.mcp.php` configuration file
-- **`Command\DiscoverCommand`**: Discovers and lists available MCP extensions
-- **`Discovery\DiscoveryManager`**: Coordinates extension discovery from multiple sources
-- **`Discovery\ComposerDiscovery`**: Scans vendor packages for MCP extensions
-- **`Discovery\LocalDiscovery`**: Scans local `mcp/` directory using reflection
-- **`Model\Configuration`**: Configuration container with validation
-- **`Service\Logger`**: PSR-3 compliant logger for MCP server
+- **`src/App.php`** - Symfony Console application builder
+- **`src/Command/ServeCommand.php`** - Starts the MCP server with STDIO transport
+- **`src/Discovery/DiscoveryManager.php`** - Coordinates extension discovery from multiple sources
+- **`src/Discovery/ComposerDiscovery.php`** - Scans vendor packages for MCP extensions via composer.json extra section
+- **`src/Discovery/LocalDiscovery.php`** - Scans local `mcp/` directory using reflection for MCP attributes
 
-### Key Directories
+### Key Features
 
-- **`src/Command/`**: Console commands (serve, init, discover)
-- **`src/Discovery/`**: Extension discovery system
-- **`src/Model/`**: Configuration and data models
-- **`src/Service/`**: Logger and supporting services
-- **`bin/`**: Executable entry points (mate, mate.php)
-- **`mcp/`**: Local MCP extensions directory
+The component supports MCP capabilities through attribute-based discovery:
 
-### AI Assistant Support
+- **Tools** - Executable functions exposed to AI assistants via `#[McpTool]` attribute
+- **Resources** - Data sources and templates via `#[McpResource]` attribute
+- **Prompts** - Pre-configured prompts via `#[McpPrompt]` attribute
 
-- JetBrains AI Assistant
-- Claude Desktop
-- Cursor (planned)
-- GitHub Copilot (planned)
+Extensions can be:
+- **Vendor packages** - Declared in composer.json extra section, must be whitelisted in `.mcp.php`
+- **Local files** - PHP files in `mcp/` directory, automatically enabled
 
-## Commands
+## Essential Commands
 
 ### Testing
 
@@ -63,52 +61,9 @@ composer cs-fix
 composer install
 ```
 
-## Development
+## Development Notes
 
-Uses **PHPUnit** with Symfony testing standards. Tests follow PSR-4 in `tests/` directory.
-
-Follows **PSR-12** coding style and **Symfony Coding Standards** via PHP-CS-Fixer. All methods require strict type declarations.
-
-## Extension System
-
-### Vendor Extensions
-
-Declared in `composer.json`:
-```json
-{
-  "extra": {
-    "symfony/ai-mate": {
-      "classes": [
-        "Vendor\\Package\\SomeTool"
-      ]
-    }
-  }
-}
-```
-
-Must be whitelisted in `.mcp.php`:
-```php
-return [
-    'enabled_plugins' => [
-        'vendor/package-name',
-    ],
-];
-```
-
-### Local Extensions
-
-PHP files in `mcp/` directory with MCP attributes:
-```php
-use Mcp\Capability\Attribute\McpTool;
-
-class MyTool
-{
-    #[McpTool('tool-name', 'Description')]
-    public function execute(): array
-    {
-        return ['result' => 'value'];
-    }
-}
-```
-
-Always enabled for development.
+- All new classes should have `@author` tags
+- Use component-specific exceptions from `src/Exception/`
+- Follow Symfony coding standards with `@Symfony` PHP CS Fixer rules
+- The component is marked as experimental and subject to BC breaks

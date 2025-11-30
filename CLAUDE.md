@@ -1,8 +1,36 @@
-# AI Mate Component
+# CLAUDE.md
 
-This component provides MCP (Model Context Protocol) server implementation for Symfony applications. It enables AI assistants to interact with Symfony projects through tools, resources, and prompts.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in the Agent component.
 
-## Development Commands
+## Component Overview
+
+AI mate is a guidance document for the AI Mate component, designed for use with Claude Code and other Coding Agents.
+
+This component provides an MCP (Model Context Protocol) server implementation that enables AI coding assistants to interact with your development environment through tools, resources, and prompts.
+
+## Architecture
+
+### Core Classes
+
+- **`src/App.php`** - Symfony Console application builder
+- **`src/Command/ServeCommand.php`** - Starts the MCP server with STDIO transport
+- **`src/Discovery/DiscoveryManager.php`** - Coordinates extension discovery from multiple sources
+- **`src/Discovery/ComposerDiscovery.php`** - Scans vendor packages for MCP extensions via composer.json extra section
+- **`src/Discovery/LocalDiscovery.php`** - Scans local `mcp/` directory using reflection for MCP attributes
+
+### Key Features
+
+The component supports MCP capabilities through attribute-based discovery:
+
+- **Tools** - Executable functions exposed to AI assistants via `#[McpTool]` attribute
+- **Resources** - Data sources and templates via `#[McpResource]` attribute
+- **Prompts** - Pre-configured prompts via `#[McpPrompt]` attribute
+
+Extensions can be:
+- **Vendor packages** - Declared in composer.json extra section, must be whitelisted in `.mcp.php`
+- **Local files** - PHP files in `mcp/` directory, automatically enabled
+
+## Essential Commands
 
 ### Testing
 
@@ -22,72 +50,15 @@ Format code:
 vendor/bin/php-cs-fixer fix
 ```
 
-Or using composer scripts:
-```bash
-composer cs-fix
-```
-
 ### Installing Dependencies
 
 ```bash
 composer install
 ```
 
-## Architecture
+## Development Notes
 
-### Core Classes
-
-- **`App`**: Symfony Console application builder
-- **`Command\ServeCommand`**: Starts the MCP server with STDIO transport
-- **`Command\InitCommand`**: Initializes `.mcp.php` configuration
-- **`Command\DiscoverCommand`**: Discovers available MCP extensions
-- **`Discovery\DiscoveryManager`**: Coordinates extension discovery
-- **`Discovery\ComposerDiscovery`**: Scans vendor packages for MCP extensions
-- **`Discovery\LocalDiscovery`**: Scans local `mcp/` directory
-- **`Model\Configuration`**: Configuration model
-- **`Service\Logger`**: PSR-3 logger implementation
-
-### Directories
-
-- **`src/Command/`**: Console commands for server lifecycle
-- **`src/Discovery/`**: Extension discovery system
-- **`src/Model/`**: Configuration and data models
-- **`src/Service/`**: Supporting services
-- **`bin/`**: Executable entry points
-- **`mcp/`**: Local MCP extensions directory
-
-### Extension Support
-
-The component supports MCP capabilities:
-- **Tools**: Executable functions exposed to AI assistants
-- **Resources**: Data sources and templates
-- **Prompts**: Pre-configured prompts for AI assistants
-
-Extensions can be:
-- **Vendor packages**: Declared in `composer.json` extra section
-- **Local files**: PHP files in `mcp/` directory with MCP attributes
-
-## Testing Architecture
-
-This component uses **PHPUnit** with standard Symfony testing practices.
-
-### Test Structure
-
-Tests follow PSR-4 autoloading in `tests/` directory (to be added).
-
-### Code Standards
-
-This component follows:
-- **PSR-12**: Coding style
-- **Symfony Coding Standards**: PHP-CS-Fixer configuration
-- **Type Safety**: Strict type declarations on all methods
-
-## Security Model
-
-**Whitelist-only plugins**: Vendor packages must be explicitly enabled in `.mcp.php` configuration. Local `mcp/` directory is always enabled for development.
-
-## Integration Points
-
-- **JetBrains AI Assistant**: STDIO transport via `php vendor/bin/mate serve`
-- **Claude Desktop**: JSON configuration with command and args
-- **MCP SDK**: Official `mcp/sdk` package for protocol implementation
+- All new classes should have `@author` tags
+- Use component-specific exceptions from `src/Exception/`
+- Follow Symfony coding standards with `@Symfony` PHP CS Fixer rules
+- The component is marked as experimental and subject to BC breaks

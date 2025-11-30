@@ -27,6 +27,7 @@ The easiest way is to create a `mcp` folder next to your `src` and `tests` direc
 Example:
 
 ```php
+// mcp/MyTool.php
 <?php
 namespace App\Mcp;
 
@@ -47,6 +48,7 @@ class MyTool
 Edit `.mcp.php` in your project root to configure AI Mate:
 
 ```php
+// .mcp.php
 <?php
 
 return [
@@ -74,6 +76,7 @@ return [
 
 3. Add to `.mcp.php`:
    ```php
+   // .mcp.php
    'enabled_plugins' => [
        'vendor/symfony-tools',
    ],
