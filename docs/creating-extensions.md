@@ -58,7 +58,23 @@ Add to `.mcp.php`:
 ```php
 return [
     'enabled_plugins' => [
+        // Include all capabilities from package
         'vendor/my-extension',
+
+        // Exclude specific classes
+        'vendor/other-extension' => [
+            'exclude' => 'Vendor\\Package\\ExperimentalTool',
+        ],
+
+        // Or exclude multiple classes
+        'vendor/third-extension' => [
+            'exclude' => ['Class1', 'Class2'],
+        ],
+
+        // Only include specific classes
+        'vendor/focused-extension' => [
+            'include_only' => 'Vendor\\Package\\SpecificTool',
+        ],
     ],
 ];
 ```
@@ -71,6 +87,12 @@ return [
 - Default: Package root directory
 - Relative to package root
 - Multiple directories supported
+
+**Plugin Filters:** Control which capabilities to load
+- No filter: Include all capabilities from package
+- `exclude`: Exclude specific class names (string or array)
+- `include_only`: Only load specific class names (string or array)
+- Cannot use both `exclude` and `include_only` for same package
 
 **Security:** Extensions must be whitelisted in `enabled_plugins`
 

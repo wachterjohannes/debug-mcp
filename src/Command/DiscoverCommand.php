@@ -59,9 +59,9 @@ class DiscoverCommand extends Command
         $io->writeln('');
 
         $io->section('Discovered Extensions');
-        foreach ($extensions as $packageName => $scanDirs) {
+        foreach ($extensions as $packageName => $data) {
             $io->writeln(\sprintf('  • <info>%s</info>', $packageName));
-            foreach ($scanDirs as $dir) {
+            foreach ($data['dirs'] as $dir) {
                 $io->writeln(\sprintf('    └─ %s', $dir));
             }
         }

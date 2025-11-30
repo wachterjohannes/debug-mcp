@@ -68,11 +68,21 @@ class ServeCommand extends Command
     {
         $scanDirs = [];
 
-        // 1. Discover Composer-based extensions (with whitelist)
+        // 1. Discover Composer-based extensions (with whitelist and filters)
         $extensions = $this->discovery->discover($this->config->enabledPlugins);
-        foreach ($extensions as $dirs) {
-            foreach ($dirs as $dir) {
+        foreach ($extensions as $packageName => $data) {
+            foreach ($data['dirs'] as $dir) {
                 $scanDirs[] = $dir;
+            }
+
+            // TODO: Apply filters from $data['filter'] during capability discovery
+            // This requires integration with MCP SDK's Container/Registry system
+            if ($data['filter']->hasFilters()) {
+                $this->logger->debug('Plugin has filters configured', [
+                    'package' => $packageName,
+                    'exclude' => $data['filter']->exclude,
+                    'include_only' => $data['filter']->includeOnly,
+                ]);
             }
         }
 

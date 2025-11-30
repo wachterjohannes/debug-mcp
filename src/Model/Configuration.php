@@ -17,7 +17,7 @@ final class Configuration
 {
     /**
      * @param string[] $scanDirs
-     * @param string[] $enabledPlugins
+     * @param array<string, PluginFilter> $enabledPlugins
      */
     private function __construct(
         public readonly string $rootDir,
@@ -42,8 +42,10 @@ final class Configuration
         $cacheDir = $config['cacheDir'];
         /** @var array<string> $scanDirs */
         $scanDirs = $config['scanDirs'];
-        /** @var array<string> $enabledPlugins */
-        $enabledPlugins = $config['enabled_plugins'] ?? [];
+
+        /** @var array<string|int, string|array{exclude?: string|string[], include_only?: string|string[]}> $rawPlugins */
+        $rawPlugins = $config['enabled_plugins'] ?? [];
+        $enabledPlugins = self::parseEnabledPlugins($rawPlugins);
 
         return new self(
             rootDir: $rootDir,
@@ -51,6 +53,93 @@ final class Configuration
             scanDirs: $scanDirs,
             enabledPlugins: $enabledPlugins,
         );
+    }
+
+    /**
+     * @param array<string|int, string|array{exclude?: string|string[], include_only?: string|string[]}> $config
+     *
+     * @return array<string, PluginFilter>
+     *
+     * @throws ConfigurationException
+     */
+    private static function parseEnabledPlugins(array $config): array
+    {
+        $plugins = [];
+
+        foreach ($config as $key => $value) {
+            // Simple string format: 'vendor/package'
+            if (\is_string($value)) {
+                $plugins[$value] = PluginFilter::all();
+                continue;
+            }
+
+            // Array format: 'vendor/package' => ['exclude' => ...]
+            if (\is_string($key)) {
+                // @phpstan-ignore function.alreadyNarrowedType
+                if (!\is_array($value)) {
+                    throw new ConfigurationException(\sprintf(
+                        'Invalid enabled_plugins entry for "%s". Expected array',
+                        $key
+                    ));
+                }
+                $plugins[$key] = self::parsePluginFilter($key, $value);
+                continue;
+            }
+
+            throw new ConfigurationException(\sprintf(
+                'Invalid enabled_plugins entry at index "%s". Expected string or "package-name" => array',
+                $key
+            ));
+        }
+
+        return $plugins;
+    }
+
+    /**
+     * @param array<mixed> $filter
+     *
+     * @throws ConfigurationException
+     */
+    private static function parsePluginFilter(string $packageName, array $filter): PluginFilter
+    {
+        $hasExclude = \array_key_exists('exclude', $filter);
+        $hasIncludeOnly = \array_key_exists('include_only', $filter);
+
+        if ($hasExclude && $hasIncludeOnly) {
+            throw new ConfigurationException(\sprintf(
+                'Plugin "%s" cannot have both "exclude" and "include_only" options',
+                $packageName
+            ));
+        }
+
+        if ($hasExclude) {
+            $exclude = $filter['exclude'];
+            if (!\is_string($exclude) && !\is_array($exclude)) {
+                throw new ConfigurationException(\sprintf(
+                    'Plugin "%s" exclude option must be string or array of strings',
+                    $packageName
+                ));
+            }
+
+            /** @var string|string[] $exclude */
+            return PluginFilter::exclude($exclude);
+        }
+
+        if ($hasIncludeOnly) {
+            $includeOnly = $filter['include_only'];
+            if (!\is_string($includeOnly) && !\is_array($includeOnly)) {
+                throw new ConfigurationException(\sprintf(
+                    'Plugin "%s" include_only option must be string or array of strings',
+                    $packageName
+                ));
+            }
+
+            /** @var string|string[] $includeOnly */
+            return PluginFilter::includeOnly($includeOnly);
+        }
+
+        // Empty array means include all
+        return PluginFilter::all();
     }
 
     /**
@@ -97,16 +186,8 @@ final class Configuration
             }
         }
 
-        if (isset($config['enabled_plugins'])) {
-            if (!\is_array($config['enabled_plugins'])) {
-                throw new ConfigurationException('Configuration key "enabled_plugins" must be an array');
-            }
-
-            foreach ($config['enabled_plugins'] as $index => $plugin) {
-                if (!\is_string($plugin) || '' === $plugin) {
-                    throw new ConfigurationException(\sprintf('Configuration key "enabled_plugins[%s]" must be a non-empty string', $index));
-                }
-            }
+        if (isset($config['enabled_plugins']) && !\is_array($config['enabled_plugins'])) {
+            throw new ConfigurationException('Configuration key "enabled_plugins" must be an array');
         }
     }
 }

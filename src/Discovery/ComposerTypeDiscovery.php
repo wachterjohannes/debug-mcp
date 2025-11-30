@@ -12,6 +12,7 @@
 namespace Symfony\AI\Mate\Discovery;
 
 use Psr\Log\LoggerInterface;
+use Symfony\AI\Mate\Model\PluginFilter;
 
 /**
  * Discovers MCP extensions via Composer package type.
@@ -46,9 +47,9 @@ final class ComposerTypeDiscovery
     }
 
     /**
-     * @param string[] $enabledPlugins
+     * @param array<string, PluginFilter> $enabledPlugins Package name => filter options
      *
-     * @return array<string, string[]> Package name => scan directories
+     * @return array<string, array{dirs: string[], filter: PluginFilter}> Package name => dirs and filter
      */
     public function discover(array $enabledPlugins = []): array
     {
@@ -62,7 +63,8 @@ final class ComposerTypeDiscovery
 
             $packageName = $package['name'];
 
-            if ([] !== $enabledPlugins && !\in_array($packageName, $enabledPlugins, true)) {
+            // Check if package is whitelisted
+            if ([] !== $enabledPlugins && !isset($enabledPlugins[$packageName])) {
                 $this->logger->debug('Skipping non-whitelisted extension', ['package' => $packageName]);
 
                 continue;
@@ -70,7 +72,11 @@ final class ComposerTypeDiscovery
 
             $scanDirs = $this->extractScanDirs($package, $packageName);
             if ([] !== $scanDirs) {
-                $extensions[$packageName] = $scanDirs;
+                $filter = $enabledPlugins[$packageName] ?? PluginFilter::all();
+                $extensions[$packageName] = [
+                    'dirs' => $scanDirs,
+                    'filter' => $filter,
+                ];
             }
         }
 
