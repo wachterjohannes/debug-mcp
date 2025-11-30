@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Wachterjohannes\DebugMcp\Command;
+namespace Symfony\AiMate\Command;
 
+use Symfony\AiMate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
-use Wachterjohannes\DebugMcp\Model\Configuration;
 
 /**
  * Look at the vendor directory and ask if we should add some

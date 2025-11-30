@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Wachterjohannes\DebugMcp\Discovery;
+namespace Symfony\AiMate\Discovery;
 
 /**
  * Coordinates discovery of MCP extensions from multiple sources.
@@ -68,7 +68,7 @@ class DiscoveryManager
         }
 
         $extra = $composerData['extra'] ?? [];
-        $mcpConfig = $extra['wachterjohannes/debug-mcp'] ?? null;
+        $mcpConfig = $extra['symfony/ai-mate'] ?? null;
 
         if (! is_array($mcpConfig)) {
             return [];

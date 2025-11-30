@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Wachterjohannes\DebugMcp\Discovery;
+namespace Symfony\AiMate\Discovery;
 
 /**
  * Discovers MCP extensions from installed Composer packages.
  *
  * Scans vendor/composer/installed.json for packages that declare
- * extension classes in their extra.wachterjohannes/debug-mcp.classes configuration.
+ * extension classes in their extra.symfony/ai-mate.classes configuration.
  */
 class ComposerDiscovery
 {
@@ -46,7 +46,7 @@ class ComposerDiscovery
             }
 
             $extra = $package['extra'] ?? [];
-            $mcpConfig = $extra['wachterjohannes/debug-mcp'] ?? null;
+            $mcpConfig = $extra['symfony/ai-mate'] ?? null;
 
             if (! is_array($mcpConfig)) {
                 continue;

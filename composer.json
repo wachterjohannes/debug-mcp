@@ -1,12 +1,12 @@
 {
-  "name": "wachterjohannes/debug-mcp",
-  "description": "Core extensible MCP server implementation in PHP with plugin architecture",
+  "name": "symfony/ai-mate",
+  "description": "AI development assistant MCP server for Symfony projects",
   "type": "library",
   "license": "MIT",
   "authors": [
     {
-      "name": "Johannes Wachter",
-      "email": "johannes@wachter.cloud"
+      "name": "Symfony Community",
+      "homepage": "https://symfony.com/contributors"
     }
   ],
   "require": {
@@ -21,17 +21,17 @@
   },
   "autoload": {
     "psr-4": {
-      "Wachterjohannes\\DebugMcp\\": "src/",
-      "Wachterjohannes\\Mcp\\": "mcp/"
+      "Symfony\\AiMate\\": "src/",
+      "Symfony\\AiMate\\Mcp\\": "mcp/"
     }
   },
   "extra": {
-    "wachterjohannes/debug-mcp": {
+    "symfony/ai-mate": {
       "classes": []
     }
   },
   "bin": [
-    "bin/debug-mcp"
+    "bin/mate"
   ],
   "scripts": {
     "cs-fix": "php-cs-fixer fix"

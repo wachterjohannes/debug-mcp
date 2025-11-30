@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Wachterjohannes\DebugMcp\Service;
+namespace Symfony\AiMate\Service;
 
 use Psr\Log\AbstractLogger;
 

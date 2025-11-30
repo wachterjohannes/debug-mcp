@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Wachterjohannes\DebugMcp\Discovery;
+namespace Symfony\AiMate\Discovery;
 
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;

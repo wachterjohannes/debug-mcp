@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Wachterjohannes\DebugMcp\Model;
+namespace Symfony\AiMate\Model;
 
 /**
  * TODO run validation some how.

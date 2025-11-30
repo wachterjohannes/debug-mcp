@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * debug-mcp entry point
+ * Symfony AI Mate entry point
  *
  * Starts the MCP server with stdio transport for JSON-RPC communication.
  */
@@ -29,8 +29,8 @@ foreach ($autoloadPaths as $autoloadPath) {
 
 $config = include dirname(__DIR__).'/src/default.config.php';
 
-use Wachterjohannes\DebugMcp\App;
-use Wachterjohannes\DebugMcp\Model\Configuration;
+use Symfony\AiMate\App;
+use Symfony\AiMate\Model\Configuration;
 
 $config = new Configuration(array_merge(['rootDir' => $root], $config, $userConfig));
 

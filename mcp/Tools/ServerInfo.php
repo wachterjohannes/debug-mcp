@@ -1,6 +1,6 @@
 <?php
 
-namespace Wachterjohannes\Mcp;
+namespace Symfony\AiMate\Mcp\Tools;
 
 use Mcp\Capability\Attribute\McpTool;
 

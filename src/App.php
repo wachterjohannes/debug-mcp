@@ -2,22 +2,22 @@
 
 declare(strict_types=1);
 
-namespace Wachterjohannes\DebugMcp;
+namespace Symfony\AiMate;
 
+use Symfony\AiMate\Command\DiscoverCommand;
+use Symfony\AiMate\Command\InitCommand;
+use Symfony\AiMate\Command\ServeCommand;
+use Symfony\AiMate\Model\Configuration;
+use Symfony\AiMate\Service\Logger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
-use Wachterjohannes\DebugMcp\Command\DiscoverCommand;
-use Wachterjohannes\DebugMcp\Command\InitCommand;
-use Wachterjohannes\DebugMcp\Command\ServeCommand;
-use Wachterjohannes\DebugMcp\Model\Configuration;
-use Wachterjohannes\DebugMcp\Service\Logger;
 
 class App
 {
     public static function build(Configuration $config): Application
     {
         $logger = new Logger();
-        $application = new Application('Debug MCP', '1.0.0');
+        $application = new Application('Symfony AI Mate', '1.0.0');
 
         self::addCommand($application, new InitCommand($config));
         self::addCommand($application, new ServeCommand($logger, $config));

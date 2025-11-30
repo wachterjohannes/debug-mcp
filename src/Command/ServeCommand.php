@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Wachterjohannes\DebugMcp\Command;
+namespace Symfony\AiMate\Command;
 
 use Mcp\Capability\Registry\Container;
 use Mcp\Server;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StdioTransport;
 use Psr\Log\LoggerInterface;
+use Symfony\AiMate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Wachterjohannes\DebugMcp\Model\Configuration;
 
 /**
  * Start the MCP server
@@ -38,7 +38,7 @@ class ServeCommand extends Command
         $cacheDir = $this->config->get('cacheDir');
 
         $server = Server::builder()
-            ->setServerInfo('debug-mcp', '0.1.1', 'Extensible MCP server for PHP development')
+            ->setServerInfo('ai-mate', '1.0.0', 'Symfony AI development assistant MCP server')
             ->setContainer($container)
             ->setDiscovery(basePath: $this->config->get('rootDir'), scanDirs: $this->getDirectoriesToScan())
             ->setSession(new FileSessionStore($cacheDir.'/sessions'))
