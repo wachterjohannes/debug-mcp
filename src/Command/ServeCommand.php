@@ -77,6 +77,7 @@ class ServeCommand extends Command
 
             // TODO: Apply filters from $data['filter'] during capability discovery
             // This requires integration with MCP SDK's Container/Registry system
+            // See: https://github.com/wachterjohannes/debug-mcp/issues/7
             if ($data['filter']->hasFilters()) {
                 $this->logger->debug('Plugin has filters configured', [
                     'package' => $packageName,
