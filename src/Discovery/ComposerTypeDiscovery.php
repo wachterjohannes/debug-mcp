@@ -21,7 +21,7 @@ use Psr\Log\LoggerInterface;
  *   "type": "ai-mate-extension",
  *   "extra": {
  *     "ai-mate": {
- *       "scan-dirs": ["src/Mcp"]
+ *       "scan-dirs": ["src"]
  *     }
  *   }
  * }
@@ -169,15 +169,15 @@ final class ComposerTypeDiscovery
 
         $aiMateConfig = $extra['ai-mate'] ?? null;
         if (null === $aiMateConfig) {
-            // Default: scan src/Mcp directory if no config provided
-            $defaultDir = 'vendor/'.$packageName.'/src/Mcp';
+            // Default: scan package root directory if no config provided
+            $defaultDir = 'vendor/'.$packageName;
             if (is_dir($this->rootDir.'/'.$defaultDir)) {
                 return [$defaultDir];
             }
 
-            $this->logger->warning('No ai-mate config and default directory not found', [
+            $this->logger->warning('Package directory not found', [
                 'package' => $packageName,
-                'default' => $defaultDir,
+                'directory' => $defaultDir,
             ]);
 
             return [];
