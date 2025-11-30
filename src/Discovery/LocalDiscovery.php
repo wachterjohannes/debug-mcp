@@ -1,11 +1,15 @@
 <?php
 
-namespace Symfony\AI\Mate\Discovery;
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use ReflectionClass;
-use ReflectionMethod;
+namespace Symfony\AI\Mate\Discovery;
 
 /**
  * Discovers MCP extensions from local mcp/ directory.
@@ -20,7 +24,7 @@ class LocalDiscovery
 
     public function __construct(?string $mcpDir = null)
     {
-        $this->mcpDir = $mcpDir ?? dirname(__DIR__, 2) . '/mcp';
+        $this->mcpDir = $mcpDir ?? \dirname(__DIR__, 2).'/mcp';
     }
 
     /**
@@ -30,7 +34,7 @@ class LocalDiscovery
      */
     public function scan(): array
     {
-        if (! is_dir($this->mcpDir)) {
+        if (!is_dir($this->mcpDir)) {
             return [];
         }
 
@@ -60,12 +64,12 @@ class LocalDiscovery
     private function findPhpFiles(string $directory): array
     {
         $phpFiles = [];
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($directory)
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($directory)
         );
 
         foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
+            if ($file->isFile() && 'php' === $file->getExtension()) {
                 $phpFiles[] = $file->getPathname();
             }
         }
@@ -79,17 +83,17 @@ class LocalDiscovery
     private function hasMcpAttributes(string $className): bool
     {
         try {
-            $reflection = new ReflectionClass($className);
+            $reflection = new \ReflectionClass($className);
 
             // Check if class methods have MCP attributes
-            foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
                 $attributes = $method->getAttributes();
                 foreach ($attributes as $attribute) {
                     $attributeName = $attribute->getName();
                     if (
-                        str_contains($attributeName, 'McpTool') ||
-                        str_contains($attributeName, 'McpResource') ||
-                        str_contains($attributeName, 'McpPrompt')
+                        str_contains($attributeName, 'McpTool')
+                        || str_contains($attributeName, 'McpResource')
+                        || str_contains($attributeName, 'McpPrompt')
                     ) {
                         return true;
                     }

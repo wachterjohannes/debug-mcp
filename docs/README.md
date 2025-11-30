@@ -27,8 +27,8 @@ The easiest way is to create a `mcp` folder next to your `src` and `tests` direc
 Example:
 
 ```php
-// mcp/MyTool.php
 <?php
+// mcp/MyTool.php
 namespace App\Mcp;
 
 use Mcp\Capability\Attribute\McpTool;
@@ -48,8 +48,8 @@ class MyTool
 Edit `.mcp.php` in your project root to configure AI Mate:
 
 ```php
-// .mcp.php
 <?php
+// .mcp.php
 
 return [
     // Whitelist vendor plugins (security: none enabled by default)
@@ -106,6 +106,14 @@ Find available MCP extensions in your vendor directory:
 
 ```bash
 vendor/bin/mate discover
+```
+
+### Clear cache
+
+Clear the MCP server cache:
+
+```bash
+vendor/bin/mate clear-cache
 ```
 
 ## Security

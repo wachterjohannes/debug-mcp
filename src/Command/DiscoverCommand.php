@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\AI\Mate\Command;
 
 use Symfony\AI\Mate\Model\Configuration;
@@ -12,7 +21,7 @@ use Symfony\Component\Finder\SplFileInfo;
 
 /**
  * Look at the vendor directory and ask if we should add some
- * MCP tools/features etc to our config
+ * MCP tools/features etc to our config.
  */
 class DiscoverCommand extends Command
 {
@@ -33,7 +42,7 @@ class DiscoverCommand extends Command
 
         $root = $this->config->get('rootDir');
         $finder = (new Finder())
-            ->in($root . '/vendor')
+            ->in($root.'/vendor')
             ->name('*.php')
             ->exclude(['composer', 'bin', 'mcp/sdk']);
 
@@ -42,13 +51,13 @@ class DiscoverCommand extends Command
             $this->processFile($file, $packages);
         }
 
-        $count = count($packages);
-        if ($count === 0) {
+        $count = \count($packages);
+        if (0 === $count) {
             $io->warning('No packages found with MCP features.');
 
             return Command::SUCCESS;
         }
-        $io->success('Discovered ' . $count . ' packages with MCP features. Please add them to your .mcp.php config file.');
+        $io->success('Discovered '.$count.' packages with MCP features. Please add them to your .mcp.php config file.');
 
         $content = implode("',\n        '", array_keys($packages));
 
@@ -67,23 +76,19 @@ PHP);
         return Command::SUCCESS;
     }
 
-    /**
-     *
-     */
     private function processFile(SplFileInfo $file, array &$packages): void
     {
         $content = file_get_contents($file->getPathname());
 
         // TODO make this better and more dynamic
         if (str_contains($content, 'Mcp\Capability\Attribute')) {
-            $parts = explode(DIRECTORY_SEPARATOR, $file->getRelativePath());
+            $parts = explode(\DIRECTORY_SEPARATOR, $file->getRelativePath());
 
-            $package = $parts[0] . '/' . $parts[1];
-            if (! isset($packages[$package])) {
+            $package = $parts[0].'/'.$parts[1];
+            if (!isset($packages[$package])) {
                 $packages[$package] = [];
             }
             $packages[$package][] = $file->getRelativePathname();
         }
     }
-
 }

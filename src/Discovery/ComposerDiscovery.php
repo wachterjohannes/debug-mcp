@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\AI\Mate\Discovery;
 
 /**
@@ -14,7 +23,7 @@ class ComposerDiscovery
 
     public function __construct(?string $vendorDir = null)
     {
-        $this->vendorDir = $vendorDir ?? dirname(__DIR__, 2) . '/vendor';
+        $this->vendorDir = $vendorDir ?? \dirname(__DIR__, 2).'/vendor';
     }
 
     /**
@@ -24,14 +33,14 @@ class ComposerDiscovery
      */
     public function scan(): array
     {
-        $installedJsonPath = $this->vendorDir . '/composer/installed.json';
+        $installedJsonPath = $this->vendorDir.'/composer/installed.json';
 
-        if (! file_exists($installedJsonPath)) {
+        if (!file_exists($installedJsonPath)) {
             return [];
         }
 
         $installedData = json_decode(file_get_contents($installedJsonPath), true);
-        if (! is_array($installedData)) {
+        if (!\is_array($installedData)) {
             return [];
         }
 
@@ -39,19 +48,19 @@ class ComposerDiscovery
         $packages = $installedData['packages'] ?? $installedData;
 
         foreach ($packages as $package) {
-            if (! is_array($package)) {
+            if (!\is_array($package)) {
                 continue;
             }
 
             $extra = $package['extra'] ?? [];
             $mcpConfig = $extra['symfony/ai-mate'] ?? null;
 
-            if (! is_array($mcpConfig)) {
+            if (!\is_array($mcpConfig)) {
                 continue;
             }
 
             $packageClasses = $mcpConfig['classes'] ?? [];
-            if (is_array($packageClasses)) {
+            if (\is_array($packageClasses)) {
                 $classes = array_merge($classes, $packageClasses);
             }
         }

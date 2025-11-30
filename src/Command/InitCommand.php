@@ -1,5 +1,14 @@
 <?php
 
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Symfony\AI\Mate\Command;
 
 use Symfony\AI\Mate\Model\Configuration;
@@ -30,7 +39,7 @@ class InitCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $root = $this->config->get('rootDir');
-        $filePath = $root . '/.mcp.php';
+        $filePath = $root.'/.mcp.php';
         if (file_exists($filePath)) {
             if ($io->confirm('File already exists. Overwrite? (y/n)', false)) {
                 unlink($filePath);
@@ -47,7 +56,7 @@ class InitCommand extends Command
 
     private function addConfigFile(SymfonyStyle $io, string $filePath): void
     {
-        copy(__DIR__ . '/../../resources/.mcp.php', $filePath);
-        $io->success(sprintf('Wrote config file to "%s"', $filePath));
+        copy(__DIR__.'/../../resources/.mcp.php', $filePath);
+        $io->success(\sprintf('Wrote config file to "%s"', $filePath));
     }
 }
