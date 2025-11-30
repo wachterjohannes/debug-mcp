@@ -19,9 +19,8 @@ class InitCommand extends Command
     public function __construct(
         private Configuration $config,
     ) {
-        parent::__construct();
+        parent::__construct(self::getDefaultName());
     }
-
 
     public static function getDefaultName(): ?string
     {

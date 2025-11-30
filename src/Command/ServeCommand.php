@@ -23,7 +23,7 @@ class ServeCommand extends Command
         private LoggerInterface $logger,
         private Configuration $config,
     ) {
-        parent::__construct();
+        parent::__construct(self::getDefaultName());
     }
 
     public static function getDefaultName(): ?string
@@ -66,9 +66,9 @@ class ServeCommand extends Command
 
             return 'vendor/' . $item;
 
-        }, $this->config->get('enabled_plugins')));
+        }, $this->config->get('enabled_plugins') ?? []));
 
-        foreach ($this->config->get('scanDir') as $dir) {
+        foreach ($this->config->get('scanDir') ?? [] as $dir) {
             $dir = trim($dir);
             if (is_string($dir) && '' !== $dir) {
                 $scanDirs[] = $dir;
