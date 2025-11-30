@@ -1,14 +1,21 @@
 <?php
 
-declare(strict_types=1);
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-namespace Wachterjohannes\DebugMcp\Command;
+namespace Symfony\AI\Mate\Command;
 
+use Symfony\AI\Mate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Wachterjohannes\DebugMcp\Model\Configuration;
 
 /**
  * Add some config in the project root, automatically discover tools.
@@ -19,9 +26,8 @@ class InitCommand extends Command
     public function __construct(
         private Configuration $config,
     ) {
-        parent::__construct();
+        parent::__construct(self::getDefaultName());
     }
-
 
     public static function getDefaultName(): ?string
     {
@@ -33,7 +39,7 @@ class InitCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $root = $this->config->get('rootDir');
-        $filePath = $root . '/.mcp.php';
+        $filePath = $root.'/.mcp.php';
         if (file_exists($filePath)) {
             if ($io->confirm('File already exists. Overwrite? (y/n)', false)) {
                 unlink($filePath);
@@ -43,14 +49,14 @@ class InitCommand extends Command
             $this->addConfigFile($io, $filePath);
         }
 
-        $io->note('Please run "vendor/bin/debug-mcp discover" to find MCP features in your vendors folder');
+        $io->note('Please run "vendor/bin/mate discover" to find MCP features in your vendors folder');
 
         return Command::SUCCESS;
     }
 
     private function addConfigFile(SymfonyStyle $io, string $filePath): void
     {
-        copy(__DIR__ . '/../../resources/.mcp.php', $filePath);
-        $io->success(sprintf('Wrote config file to "%s"', $filePath));
+        copy(__DIR__.'/../../resources/.mcp.php', $filePath);
+        $io->success(\sprintf('Wrote config file to "%s"', $filePath));
     }
 }

@@ -1,53 +1,123 @@
-# Local MCP server for development
+# Symfony AI Mate - Local MCP Server
 
-This is a PHP tool to run a local server that will help your Jetbrains AI, Claude, Github Copilot,
-Cursor or whatever AI tool you use to be more efficient and correct.
+This is a PHP tool that creates a local MCP server to enhance your AI development assistant (JetBrains AI, Claude, GitHub Copilot, Cursor, etc.) with Symfony-specific knowledge and tools.
 
-This is the core package that will create an manage your server. It includes some standard tools.
-Framework or project specific tools will live in their own packages.
+This is the core package that creates and manages your MCP server. It includes some standard tools, while framework or project-specific tools live in their own packages.
 
 ## Usage
 
 Install with composer:
 
 ```bash
-composer require symfony/package-name
+composer require symfony/ai-mate
 ```
 
-See how to integrate your tool in the [integration guide](integration.md).
+Initialize configuration:
+
+```bash
+vendor/bin/mate init
+```
+
+See how to integrate with your AI tool in the [integration guide](integration.md).
 
 ## How to add features?
 
-The easiest way is to create a folder next to your `src` and `test` directory. And add classes with
-`#[McpTool]`.
+The easiest way is to create a `mcp` folder next to your `src` and `tests` directories, then add classes with `#[McpTool]` attributes.
+
+Example:
+
+```php
+<?php
+// mcp/MyTool.php
+namespace App\Mcp;
+
+use Mcp\Capability\Attribute\McpTool;
+
+class MyTool
+{
+    #[McpTool(name: 'my_tool', description: 'My custom tool')]
+    public function execute(string $param): array
+    {
+        return ['result' => $param];
+    }
+}
+```
 
 ## Configuration
 
-Explain how we add 3rd party tools and local tools.
+Edit `.mcp.php` in your project root to configure AI Mate:
+
+```php
+<?php
+// .mcp.php
+
+return [
+    // Whitelist vendor plugins (security: none enabled by default)
+    'enabled_plugins' => [
+        'vendor/package-name',
+    ],
+
+    // Local directories to scan (always enabled)
+    'scanDir' => ['mcp'],
+];
+```
+
+### Adding Third-Party Tools
+
+1. Install the package:
+   ```bash
+   composer require vendor/symfony-tools
+   ```
+
+2. Discover available tools:
+   ```bash
+   vendor/bin/mate discover
+   ```
+
+3. Add to `.mcp.php`:
+   ```php
+   // .mcp.php
+   'enabled_plugins' => [
+       'vendor/symfony-tools',
+   ],
+   ```
 
 ## Commands
 
 ### Init
 
+Initialize `.mcp.php` configuration file:
+
 ```bash
-vendor/bin/mcp init
+vendor/bin/mate init
 ```
 
 ### Run server
 
+Start the MCP server:
+
 ```bash
-vendor/bin/mcp serve
+vendor/bin/mate serve
 ```
 
-### Discovery more mcp features
+### Discover MCP features
+
+Find available MCP extensions in your vendor directory:
 
 ```bash
-vendor/bin/mcp discover
+vendor/bin/mate discover
 ```
 
 ### Clear cache
 
+Clear the MCP server cache:
+
 ```bash
-vendor/bin/mcp clear-cache
+vendor/bin/mate clear-cache
 ```
 
+## Security
+
+For security, no vendor plugins are enabled by default. You must explicitly whitelist packages in the `enabled_plugins` configuration.
+
+Local `mcp/` directory is always enabled for rapid development.

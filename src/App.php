@@ -1,33 +1,42 @@
 <?php
 
-declare(strict_types=1);
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-namespace Wachterjohannes\DebugMcp;
+namespace Symfony\AI\Mate;
 
+use Symfony\AI\Mate\Command\ClearCacheCommand;
+use Symfony\AI\Mate\Command\DiscoverCommand;
+use Symfony\AI\Mate\Command\InitCommand;
+use Symfony\AI\Mate\Command\ServeCommand;
+use Symfony\AI\Mate\Model\Configuration;
+use Symfony\AI\Mate\Service\Logger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
-use Wachterjohannes\DebugMcp\Command\DiscoverCommand;
-use Wachterjohannes\DebugMcp\Command\InitCommand;
-use Wachterjohannes\DebugMcp\Command\ServeCommand;
-use Wachterjohannes\DebugMcp\Model\Configuration;
-use Wachterjohannes\DebugMcp\Service\Logger;
 
-class App
+final class App
 {
     public static function build(Configuration $config): Application
     {
         $logger = new Logger();
-        $application = new Application('Debug MCP', '1.0.0');
+        $application = new Application('Symfony AI Mate', '0.1.0');
 
         self::addCommand($application, new InitCommand($config));
         self::addCommand($application, new ServeCommand($logger, $config));
         self::addCommand($application, new DiscoverCommand($config));
+        self::addCommand($application, new ClearCacheCommand($config));
 
         return $application;
     }
 
     /**
-     * Add commands in a way that works with all support symfony/console versions
+     * Add commands in a way that works with all support symfony/console versions.
      */
     private static function addCommand(Application $application, Command $command)
     {

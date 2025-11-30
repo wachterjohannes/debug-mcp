@@ -1,6 +1,6 @@
-# CLAUDE.md
+# AGENTS.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in the Agent component.
+AI agent guidance for the Chat component.
 
 ## Component Overview
 
@@ -48,6 +48,11 @@ vendor/bin/phpstan
 Format code:
 ```bash
 vendor/bin/php-cs-fixer fix
+```
+
+Or use composer script:
+```bash
+composer cs-fix
 ```
 
 ### Installing Dependencies

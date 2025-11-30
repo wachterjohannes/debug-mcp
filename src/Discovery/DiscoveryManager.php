@@ -1,8 +1,15 @@
 <?php
 
-declare(strict_types=1);
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-namespace Wachterjohannes\DebugMcp\Discovery;
+namespace Symfony\AI\Mate\Discovery;
 
 /**
  * Coordinates discovery of MCP extensions from multiple sources.
@@ -21,11 +28,11 @@ class DiscoveryManager
     public function __construct(
         ?ComposerDiscovery $composerDiscovery = null,
         ?LocalDiscovery $localDiscovery = null,
-        ?string $rootDir = null
+        ?string $rootDir = null,
     ) {
         $this->rootDir = $rootDir ?? getcwd();
-        $this->composerDiscovery = $composerDiscovery ?? new ComposerDiscovery($this->rootDir . '/vendor');
-        $this->localDiscovery = $localDiscovery ?? new LocalDiscovery($this->rootDir . '/mcp');
+        $this->composerDiscovery = $composerDiscovery ?? new ComposerDiscovery($this->rootDir.'/vendor');
+        $this->localDiscovery = $localDiscovery ?? new LocalDiscovery($this->rootDir.'/mcp');
     }
 
     /**
@@ -56,26 +63,26 @@ class DiscoveryManager
      */
     private function readExtraConfig(): array
     {
-        $composerJsonPath = $this->rootDir . '/composer.json';
+        $composerJsonPath = $this->rootDir.'/composer.json';
 
-        if (! file_exists($composerJsonPath)) {
+        if (!file_exists($composerJsonPath)) {
             return [];
         }
 
         $composerData = json_decode(file_get_contents($composerJsonPath), true);
-        if (! is_array($composerData)) {
+        if (!\is_array($composerData)) {
             return [];
         }
 
         $extra = $composerData['extra'] ?? [];
-        $mcpConfig = $extra['wachterjohannes/debug-mcp'] ?? null;
+        $mcpConfig = $extra['symfony/ai-mate'] ?? null;
 
-        if (! is_array($mcpConfig)) {
+        if (!\is_array($mcpConfig)) {
             return [];
         }
 
         $classes = $mcpConfig['classes'] ?? [];
 
-        return is_array($classes) ? $classes : [];
+        return \is_array($classes) ? $classes : [];
     }
 }

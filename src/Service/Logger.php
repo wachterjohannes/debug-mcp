@@ -1,8 +1,15 @@
 <?php
 
-declare(strict_types=1);
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 
-namespace Wachterjohannes\DebugMcp\Service;
+namespace Symfony\AI\Mate\Service;
 
 use Psr\Log\AbstractLogger;
 
@@ -12,18 +19,18 @@ class Logger extends AbstractLogger
     {
         $debug = $_SERVER['DEBUG'] ?? false;
 
-        if (! $debug && 'debug' === $level) {
+        if (!$debug && 'debug' === $level) {
             return;
         }
 
-        $logMessage = sprintf(
+        $logMessage = \sprintf(
             "[%s] %s %s\n",
             strtoupper($level),
             $message,
-            ([] === $context || ! $debug) ? '' : json_encode($context),
+            ([] === $context || !$debug) ? '' : json_encode($context),
         );
 
-        if (($_SERVER['FILE_LOG'] ?? false) || ! defined('STDERR')) {
+        if (($_SERVER['FILE_LOG'] ?? false) || !\defined('STDERR')) {
             file_put_contents('dev.log', $logMessage, \FILE_APPEND);
         } else {
             fwrite(\STDERR, $logMessage);
