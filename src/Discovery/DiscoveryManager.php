@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Symfony\AiMate\Discovery;
+namespace Symfony\AI\Mate\Discovery;
 
 /**
  * Coordinates discovery of MCP extensions from multiple sources.

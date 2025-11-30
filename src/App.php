@@ -1,14 +1,12 @@
 <?php
 
-declare(strict_types=1);
+namespace Symfony\AI\Mate;
 
-namespace Symfony\AiMate;
-
-use Symfony\AiMate\Command\DiscoverCommand;
-use Symfony\AiMate\Command\InitCommand;
-use Symfony\AiMate\Command\ServeCommand;
-use Symfony\AiMate\Model\Configuration;
-use Symfony\AiMate\Service\Logger;
+use Symfony\AI\Mate\Command\DiscoverCommand;
+use Symfony\AI\Mate\Command\InitCommand;
+use Symfony\AI\Mate\Command\ServeCommand;
+use Symfony\AI\Mate\Model\Configuration;
+use Symfony\AI\Mate\Service\Logger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
 
@@ -17,7 +15,7 @@ class App
     public static function build(Configuration $config): Application
     {
         $logger = new Logger();
-        $application = new Application('Symfony AI Mate', '1.0.0');
+        $application = new Application('Symfony AI Mate', '0.1.0');
 
         self::addCommand($application, new InitCommand($config));
         self::addCommand($application, new ServeCommand($logger, $config));

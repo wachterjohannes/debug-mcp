@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 /**
  * Symfony AI Mate entry point
  *
@@ -29,8 +27,8 @@ foreach ($autoloadPaths as $autoloadPath) {
 
 $config = include dirname(__DIR__).'/src/default.config.php';
 
-use Symfony\AiMate\App;
-use Symfony\AiMate\Model\Configuration;
+use Symfony\AI\Mate\App;
+use Symfony\AI\Mate\Model\Configuration;
 
 $config = new Configuration(array_merge(['rootDir' => $root], $config, $userConfig));
 

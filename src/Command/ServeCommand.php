@@ -1,15 +1,13 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Symfony\AiMate\Command;
+namespace Symfony\AI\Mate\Command;
 
 use Mcp\Capability\Registry\Container;
 use Mcp\Server;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StdioTransport;
 use Psr\Log\LoggerInterface;
-use Symfony\AiMate\Model\Configuration;
+use Symfony\AI\Mate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -38,7 +36,7 @@ class ServeCommand extends Command
         $cacheDir = $this->config->get('cacheDir');
 
         $server = Server::builder()
-            ->setServerInfo('ai-mate', '1.0.0', 'Symfony AI development assistant MCP server')
+            ->setServerInfo('ai-mate', '0.1.0', 'Symfony AI development assistant MCP server')
             ->setContainer($container)
             ->setDiscovery(basePath: $this->config->get('rootDir'), scanDirs: $this->getDirectoriesToScan())
             ->setSession(new FileSessionStore($cacheDir.'/sessions'))

@@ -1,10 +1,8 @@
 <?php
 
-declare(strict_types=1);
+namespace Symfony\AI\Mate\Command;
 
-namespace Symfony\AiMate\Command;
-
-use Symfony\AiMate\Model\Configuration;
+use Symfony\AI\Mate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

@@ -21,8 +21,8 @@
   },
   "autoload": {
     "psr-4": {
-      "Symfony\\AiMate\\": "src/",
-      "Symfony\\AiMate\\Mcp\\": "mcp/"
+      "Symfony\\AI\\Mate\\": "src/",
+      "Symfony\\AI\\Mate\\Mcp\\": "mcp/"
     }
   },
   "extra": {

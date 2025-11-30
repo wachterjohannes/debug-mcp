@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Symfony\AiMate\Discovery;
+namespace Symfony\AI\Mate\Discovery;
 
 use RecursiveDirectoryIterator;
 use RecursiveIteratorIterator;

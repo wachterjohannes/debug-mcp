@@ -1,8 +1,8 @@
 # AI Mate
 
-Symfony integration for [Model Context Protocol](https://modelcontextprotocol.io) using the official MCP SDK [mcp/sdk](https://github.com/modelcontextprotocol/php-sdk).
+Framework agnostic platform for [Model Context Protocol](https://modelcontextprotocol.io) server to integrate with your AI coding assistant.
 
-Supports MCP capabilities (tools, prompts, resources) as server via STDIO transport. Provides extensible architecture for adding Symfony-specific AI development tools.
+Supports MCP capabilities (tools, prompts, resources) as server via STDIO transport. Provides extensible architecture for adding AI development tools.
 
 **This bundle is experimental.** Experimental features are not covered by Symfony's [Backward Compatibility Promise](https://symfony.com/doc/current/contributing/code/bc.html).
 

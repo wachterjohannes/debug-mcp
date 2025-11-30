@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Symfony\AiMate\Model;
+namespace Symfony\AI\Mate\Model;
 
 /**
  * TODO run validation some how.

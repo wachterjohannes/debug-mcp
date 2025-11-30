@@ -1,8 +1,6 @@
 <?php
 
-declare(strict_types=1);
-
-namespace Symfony\AiMate\Service;
+namespace Symfony\AI\Mate\Service;
 
 use Psr\Log\AbstractLogger;
 
