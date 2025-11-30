@@ -33,6 +33,9 @@ class ServerInfo
         return \PHP_OS_FAMILY;
     }
 
+    /**
+     * @return string[]
+     */
     #[McpTool('php-extensions', 'Get a list of PHP extensions')]
     public function extensions(): array
     {

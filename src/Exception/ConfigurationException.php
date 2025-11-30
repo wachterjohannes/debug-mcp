@@ -9,8 +9,11 @@
  * file that was distributed with this source code.
  */
 
-return [
-    'cacheDir' => sys_get_temp_dir().'/mcp',
-    'scanDirs' => ['mcp'],
-    'enabled_plugins' => [],
-];
+namespace Symfony\AI\Mate\Exception;
+
+/**
+ * Exception thrown when configuration is invalid.
+ */
+class ConfigurationException extends \InvalidArgumentException
+{
+}

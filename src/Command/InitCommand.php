@@ -38,7 +38,7 @@ class InitCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $root = $this->config->get('rootDir');
+        $root = $this->config->rootDir;
         $filePath = $root.'/.mcp.php';
         if (file_exists($filePath)) {
             if ($io->confirm('File already exists. Overwrite? (y/n)', false)) {

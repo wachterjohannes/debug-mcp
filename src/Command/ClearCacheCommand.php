@@ -38,7 +38,7 @@ class ClearCacheCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $cacheDir = $this->config->get('cacheDir');
+        $cacheDir = $this->config->cacheDir;
 
         if (!is_dir($cacheDir)) {
             $io->success('Cache directory does not exist. Nothing to clear.');

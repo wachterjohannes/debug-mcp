@@ -42,13 +42,12 @@ class ServeCommand extends Command
     {
         $container = new Container();
         $container->set(LoggerInterface::class, $this->logger);
-        $cacheDir = $this->config->get('cacheDir');
 
         $server = Server::builder()
             ->setServerInfo('ai-mate', '0.1.0', 'Symfony AI development assistant MCP server')
             ->setContainer($container)
-            ->setDiscovery(basePath: $this->config->get('rootDir'), scanDirs: $this->getDirectoriesToScan())
-            ->setSession(new FileSessionStore($cacheDir.'/sessions'))
+            ->setDiscovery(basePath: $this->config->rootDir, scanDirs: $this->getDirectoriesToScan())
+            ->setSession(new FileSessionStore($this->config->cacheDir.'/sessions'))
             ->setLogger($this->logger)
             ->build();
 
@@ -63,7 +62,7 @@ class ServeCommand extends Command
      */
     private function getDirectoriesToScan(): array
     {
-        $rootDir = $this->config->get('rootDir');
+        $rootDir = $this->config->rootDir;
         $scanDirs = array_filter(array_map(function ($item) use ($rootDir) {
             if (!is_dir($rootDir.'/vendor/'.$item)) {
                 $this->logger->error('Plugin "'.$item.'" not found');
@@ -72,11 +71,11 @@ class ServeCommand extends Command
             }
 
             return 'vendor/'.$item;
-        }, $this->config->get('enabled_plugins') ?? []));
+        }, $this->config->enabledPlugins));
 
-        foreach ($this->config->get('scanDir') ?? [] as $dir) {
+        foreach ($this->config->scanDirs as $dir) {
             $dir = trim($dir);
-            if (\is_string($dir) && '' !== $dir) {
+            if ('' !== $dir) {
                 $scanDirs[] = $dir;
             }
         }

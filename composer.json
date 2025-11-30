@@ -28,7 +28,12 @@
         "symfony/finder": "^6.4 || ^7.3 || ^8.0"
     },
     "require-dev": {
-        "php-cs-fixer/shim": "^3.75"
+        "php-cs-fixer/shim": "^3.75",
+        "phpstan/phpstan": "^2.0"
+    },
+    "scripts": {
+        "phpstan": "phpstan analyse",
+        "cs-fix": "php-cs-fixer fix"
     },
     "autoload": {
         "psr-4": {
