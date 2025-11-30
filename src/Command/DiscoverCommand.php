@@ -40,7 +40,7 @@ class DiscoverCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $root = $this->config->get('rootDir');
+        $root = $this->config->rootDir;
         $finder = (new Finder())
             ->in($root.'/vendor')
             ->name('*.php')
@@ -76,13 +76,23 @@ PHP);
         return Command::SUCCESS;
     }
 
+    /**
+     * @param array<string, string[]> $packages
+     */
     private function processFile(SplFileInfo $file, array &$packages): void
     {
         $content = file_get_contents($file->getPathname());
+        if (false === $content) {
+            return;
+        }
 
         // TODO make this better and more dynamic
         if (str_contains($content, 'Mcp\Capability\Attribute')) {
             $parts = explode(\DIRECTORY_SEPARATOR, $file->getRelativePath());
+
+            if (\count($parts) < 2) {
+                return;
+            }
 
             $package = $parts[0].'/'.$parts[1];
             if (!isset($packages[$package])) {

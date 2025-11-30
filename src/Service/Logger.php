@@ -23,9 +23,15 @@ class Logger extends AbstractLogger
             return;
         }
 
+        $levelString = match (true) {
+            $level instanceof \Stringable => (string) $level,
+            \is_string($level) => $level,
+            default => 'unknown',
+        };
+
         $logMessage = \sprintf(
             "[%s] %s %s\n",
-            strtoupper($level),
+            strtoupper($levelString),
             $message,
             ([] === $context || !$debug) ? '' : json_encode($context),
         );

@@ -38,8 +38,9 @@ final class App
     /**
      * Add commands in a way that works with all support symfony/console versions.
      */
-    private static function addCommand(Application $application, Command $command)
+    private static function addCommand(Application $application, Command $command): void
     {
+        // @phpstan-ignore function.alreadyNarrowedType
         if (method_exists($application, 'addCommand')) {
             $application->addCommand($command);
         } elseif (method_exists($application, 'add')) {

@@ -32,7 +32,7 @@ $config = include dirname(__DIR__).'/src/default.config.php';
 use Symfony\AI\Mate\App;
 use Symfony\AI\Mate\Model\Configuration;
 
-$config = new Configuration(array_merge(['rootDir' => $root], $config, $userConfig));
+$config = Configuration::fromArray(array_merge(['rootDir' => $root], $config, $userConfig));
 
 // Create and run server
 $app = App::build($config);
