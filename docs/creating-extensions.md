@@ -89,7 +89,8 @@ return [
 
 ## Dependency Injection
 
-Tools, resources, and prompts support constructor dependency injection via Symfony's DI Container. Dependencies are automatically resolved and injected.
+Tools, resources, and prompts support constructor dependency injection via Symfony's DI Container. Dependencies are
+automatically resolved and injected.
 
 ### Configuring Services
 
@@ -134,6 +135,7 @@ Use `%env(VAR_NAME)%` syntax in service configuration to reference environment v
 ## Configuration Reference
 
 **Package Type:** `ai-mate-extension` (required)
+FIXME: Should we really require this? What if a package (library) want to have one extra class for the mcp?
 
 **Scan Directories:** `extra.ai-mate.scan-dirs` (optional)
 - Default: Package root directory
@@ -150,8 +152,10 @@ Use `%env(VAR_NAME)%` syntax in service configuration to reference environment v
 - `exclude`: Exclude specific class names (string or array)
 - `include_only`: Only load specific class names (string or array)
 - Cannot use both `exclude` and `include_only` for same package
+FIXME: Should we out source this to the extension instead? Ie, let them provide config to disable?
 
 **Security:** Extensions must be whitelisted in `enabledPlugins`
+FIXME: I like this. But maybe we must improve our "discover" command to automatically add plugins
 
 ## Troubleshooting
 

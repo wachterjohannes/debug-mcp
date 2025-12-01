@@ -14,6 +14,7 @@ $autoloadPaths = [
     __DIR__ . '/../vendor/autoload.php', // Package autoloader (fallback)
 ];
 
+$root = null;
 $userConfig = [];
 foreach ($autoloadPaths as $autoloadPath) {
     if (file_exists($autoloadPath)) {
@@ -27,6 +28,11 @@ foreach ($autoloadPaths as $autoloadPath) {
     }
 }
 
+if (!$root) {
+    echo 'Unable to locate the Composer vendor directory. Did you run composer install?'.PHP_EOL;
+    exit(1);
+}
+
 $config = include dirname(__DIR__).'/src/default.config.php';
 
 use Symfony\AI\Mate\App;
@@ -34,6 +40,4 @@ use Symfony\AI\Mate\Model\Configuration;
 
 $config = Configuration::fromArray(array_merge(['rootDir' => $root], $config, $userConfig));
 
-// Create and run server
-$app = App::build($config);
-$app->run();
+App::build($config)->run();
