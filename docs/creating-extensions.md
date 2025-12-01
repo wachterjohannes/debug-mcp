@@ -11,7 +11,7 @@ MCP extensions are Composer packages that declare themselves using a specific pa
   "name": "vendor/my-extension",
   "type": "ai-mate-extension",
   "require": {
-    "mcp/sdk": "^1.0"
+    "symfony/au-mate": "^1.0"
   }
 }
 ```

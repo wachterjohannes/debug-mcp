@@ -56,18 +56,6 @@ final class Configuration
     }
 
     /**
-     * @throws ConfigurationException If key does not exist
-     */
-    public function get(string $key): mixed
-    {
-        if (!property_exists($this, $key)) {
-            throw new ConfigurationException(\sprintf('Configuration key "%s" does not exist', $key));
-        }
-
-        return $this->{$key};
-    }
-
-    /**
      * @param array<string|int, string|array{exclude?: string|string[], include_only?: string|string[]}> $config
      *
      * @return array<string, PluginFilter>
