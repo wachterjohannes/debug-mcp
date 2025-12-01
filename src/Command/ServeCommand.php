@@ -11,13 +11,15 @@
 
 namespace Symfony\AI\Mate\Command;
 
-use Mcp\Capability\Registry\Container;
 use Mcp\Server;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StdioTransport;
 use Psr\Log\LoggerInterface;
+use Symfony\AI\Mate\Container\ContainerFactory;
+use Symfony\AI\Mate\Container\FilteredDiscoveryLoader;
 use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
 use Symfony\AI\Mate\Model\Configuration;
+use Symfony\AI\Mate\Model\PluginFilter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -44,13 +46,33 @@ class ServeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $container = new Container();
-        $container->set(LoggerInterface::class, $this->logger);
+        // 1. Discover extensions with their filters and service files
+        $extensions = $this->getExtensionsToLoad();
 
+        // 2. Build Symfony DI container with extension services
+        $containerFactory = new ContainerFactory($this->logger);
+        $container = $containerFactory->create($extensions);
+
+        // 3. Create filtered discovery loader
+        $loader = new FilteredDiscoveryLoader(
+            basePath: $this->config->rootDir,
+            extensions: $extensions,
+            excludeDirs: [],
+            logger: $this->logger,
+            container: $container,
+        );
+
+        // 4. Pre-register discovered services in the container (before compilation)
+        $loader->registerServices();
+
+        // 5. Compile the container (resolves parameters and validates)
+        $container->compile();
+
+        // 6. Build and run MCP server
         $server = Server::builder()
             ->setServerInfo('ai-mate', '0.1.0', 'Symfony AI development assistant MCP server')
             ->setContainer($container)
-            ->setDiscovery(basePath: $this->config->rootDir, scanDirs: $this->getDirectoriesToScan())
+            ->addLoaders($loader)
             ->setSession(new FileSessionStore($this->config->cacheDir.'/sessions'))
             ->setLogger($this->logger)
             ->build();
@@ -62,42 +84,44 @@ class ServeCommand extends Command
     }
 
     /**
-     * @return string[]
+     * Get all extensions to load with their scan directories and filters.
+     *
+     * @return array<string, array{dirs: string[], filter: PluginFilter, includes: string[]}>
      */
-    private function getDirectoriesToScan(): array
+    private function getExtensionsToLoad(): array
     {
-        $scanDirs = [];
+        $extensions = [];
 
         // 1. Discover Composer-based extensions (with whitelist and filters)
-        $extensions = $this->discovery->discover($this->config->enabledPlugins);
-        foreach ($extensions as $packageName => $data) {
-            foreach ($data['dirs'] as $dir) {
-                $scanDirs[] = $dir;
-            }
-
-            // TODO: Apply filters from $data['filter'] during capability discovery
-            // This requires integration with MCP SDK's Container/Registry system
-            // See: https://github.com/wachterjohannes/debug-mcp/issues/7
-            if ($data['filter']->hasFilters()) {
-                $this->logger->debug('Plugin has filters configured', [
-                    'package' => $packageName,
-                    'exclude' => $data['filter']->exclude,
-                    'include_only' => $data['filter']->includeOnly,
-                ]);
-            }
+        foreach ($this->discovery->discover($this->config->enabledPlugins) as $packageName => $data) {
+            $extensions[$packageName] = $data;
         }
 
         // 2. Add custom scan directories from configuration
+        $customDirs = [];
         foreach ($this->config->scanDirs as $dir) {
             $dir = trim($dir);
             if ('' !== $dir) {
-                $scanDirs[] = $dir;
+                // TODO make sure it is inside the package.
+                $customDirs[] = $dir;
             }
+        }
+        if ([] !== $customDirs) {
+            $extensions['_custom'] = [
+                'dirs' => $customDirs,
+                'filter' => PluginFilter::all(),
+                'includes' => [],
+            ];
         }
 
         // 3. Always include local mcp/ directory (trusted project code)
-        $scanDirs[] = substr(\dirname(__DIR__, 2).'/mcp', \strlen($this->config->rootDir));
+        $mcpDir = substr(\dirname(__DIR__, 2).'/mcp', \strlen($this->config->rootDir));
+        $extensions['_local'] = [
+            'dirs' => [$mcpDir],
+            'filter' => PluginFilter::all(),
+            'includes' => [],
+        ];
 
-        return $scanDirs;
+        return $extensions;
     }
 }

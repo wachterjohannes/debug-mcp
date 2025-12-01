@@ -1,8 +1,10 @@
 # Symfony AI Mate - Local MCP Server
 
-This is a PHP tool that creates a local MCP server to enhance your AI development assistant (JetBrains AI, Claude, GitHub Copilot, Cursor, etc.) with Symfony-specific knowledge and tools.
+This is a PHP tool that creates a local MCP server to enhance your AI development assistant (JetBrains AI, Claude, GitHub
+Copilot, Cursor, etc.) with Symfony-specific knowledge and tools.
 
-This is the core package that creates and manages your MCP server. It includes some standard tools, while framework or project-specific tools live in their own packages.
+This is the core package that creates and manages your MCP server. It includes some standard tools, while framework or
+project-specific tools live in their own packages.
 
 ## Usage
 
@@ -22,7 +24,8 @@ See how to integrate with your AI tool in the [integration guide](integration.md
 
 ## How to add features?
 
-The easiest way is to create a `mcp` folder next to your `src` and `tests` directories, then add classes with `#[McpTool]` attributes.
+The easiest way is to create a `mcp` folder next to your `src` and `tests` directories, then add classes with `#[McpTool]`
+attributes.
 
 Example:
 
@@ -118,6 +121,7 @@ vendor/bin/mate clear-cache
 
 ## Security
 
-For security, no vendor plugins are enabled by default. You must explicitly whitelist packages in the `enabled_plugins` configuration.
+For security, no vendor plugins are enabled by default. You must explicitly whitelist packages in the `enabled_plugins`
+configuration.
 
 Local `mcp/` directory is always enabled for rapid development.
