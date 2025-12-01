@@ -16,7 +16,7 @@ use Symfony\AI\Mate\Exception\ConfigurationException;
 final class Configuration
 {
     /**
-     * @param string[] $scanDirs
+     * @param string[]                    $scanDirs
      * @param array<string, PluginFilter> $enabledPlugins
      */
     private function __construct(
@@ -56,6 +56,18 @@ final class Configuration
     }
 
     /**
+     * @throws ConfigurationException If key does not exist
+     */
+    public function get(string $key): mixed
+    {
+        if (!property_exists($this, $key)) {
+            throw new ConfigurationException(\sprintf('Configuration key "%s" does not exist', $key));
+        }
+
+        return $this->{$key};
+    }
+
+    /**
      * @param array<string|int, string|array{exclude?: string|string[], include_only?: string|string[]}> $config
      *
      * @return array<string, PluginFilter>
@@ -77,19 +89,13 @@ final class Configuration
             if (\is_string($key)) {
                 // @phpstan-ignore function.alreadyNarrowedType
                 if (!\is_array($value)) {
-                    throw new ConfigurationException(\sprintf(
-                        'Invalid enabled_plugins entry for "%s". Expected array',
-                        $key
-                    ));
+                    throw new ConfigurationException(\sprintf('Invalid enabled_plugins entry for "%s". Expected array', $key));
                 }
                 $plugins[$key] = self::parsePluginFilter($key, $value);
                 continue;
             }
 
-            throw new ConfigurationException(\sprintf(
-                'Invalid enabled_plugins entry at index "%s". Expected string or "package-name" => array',
-                $key
-            ));
+            throw new ConfigurationException(\sprintf('Invalid enabled_plugins entry at index "%s". Expected string or "package-name" => array', $key));
         }
 
         return $plugins;
@@ -106,52 +112,35 @@ final class Configuration
         $hasIncludeOnly = \array_key_exists('include_only', $filter);
 
         if ($hasExclude && $hasIncludeOnly) {
-            throw new ConfigurationException(\sprintf(
-                'Plugin "%s" cannot have both "exclude" and "include_only" options',
-                $packageName
-            ));
+            throw new ConfigurationException(\sprintf('Plugin "%s" cannot have both "exclude" and "include_only" options', $packageName));
         }
 
         if ($hasExclude) {
             $exclude = $filter['exclude'];
-            if (!\is_string($exclude) && !\is_array($exclude)) {
-                throw new ConfigurationException(\sprintf(
-                    'Plugin "%s" exclude option must be string or array of strings',
-                    $packageName
-                ));
+            if (\is_string($exclude)) {
+                return PluginFilter::exclude($exclude);
             }
-
-            /** @var string|string[] $exclude */
-            return PluginFilter::exclude($exclude);
+            if (\is_array($exclude)) {
+                // @phpstan-ignore argument.type
+                return PluginFilter::exclude($exclude);
+            }
+            throw new ConfigurationException(\sprintf('Plugin "%s" exclude option must be string or array of strings', $packageName));
         }
 
         if ($hasIncludeOnly) {
             $includeOnly = $filter['include_only'];
-            if (!\is_string($includeOnly) && !\is_array($includeOnly)) {
-                throw new ConfigurationException(\sprintf(
-                    'Plugin "%s" include_only option must be string or array of strings',
-                    $packageName
-                ));
+            if (\is_string($includeOnly)) {
+                return PluginFilter::includeOnly($includeOnly);
             }
-
-            /** @var string|string[] $includeOnly */
-            return PluginFilter::includeOnly($includeOnly);
+            if (\is_array($includeOnly)) {
+                // @phpstan-ignore argument.type
+                return PluginFilter::includeOnly($includeOnly);
+            }
+            throw new ConfigurationException(\sprintf('Plugin "%s" include_only option must be string or array of strings', $packageName));
         }
 
         // Empty array means include all
         return PluginFilter::all();
-    }
-
-    /**
-     * @throws ConfigurationException If key does not exist
-     */
-    public function get(string $key): mixed
-    {
-        if (!property_exists($this, $key)) {
-            throw new ConfigurationException(\sprintf('Configuration key "%s" does not exist', $key));
-        }
-
-        return $this->{$key};
     }
 
     /**

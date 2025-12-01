@@ -49,7 +49,7 @@ final class ComposerTypeDiscovery
     /**
      * @param array<string, PluginFilter> $enabledPlugins Package name => filter options
      *
-     * @return array<string, array{dirs: string[], filter: PluginFilter}> Package name => dirs and filter
+     * @return array<string, array{dirs: string[], filter: PluginFilter, includes: string[]}> Package name => dirs, filter, and include files
      */
     public function discover(array $enabledPlugins = []): array
     {
@@ -73,9 +73,11 @@ final class ComposerTypeDiscovery
             $scanDirs = $this->extractScanDirs($package, $packageName);
             if ([] !== $scanDirs) {
                 $filter = $enabledPlugins[$packageName] ?? PluginFilter::all();
+                $includeFiles = $this->extractIncludeFiles($package, $packageName);
                 $extensions[$packageName] = [
                     'dirs' => $scanDirs,
                     'filter' => $filter,
+                    'includes' => $includeFiles,
                 ];
             }
         }
@@ -221,5 +223,62 @@ final class ComposerTypeDiscovery
         }
 
         return $validDirs;
+    }
+
+    /**
+     * Extract include files from package extra config.
+     *
+     * Uses "includes" key to match PHPStan's extension pattern:
+     * "extra": { "ai-mate": { "includes": ["config/services.php"] } }
+     *
+     * @param array{
+     *     name: string,
+     *     type: string,
+     *     extra?: array<string, mixed>,
+     * } $package
+     *
+     * @return string[]
+     */
+    private function extractIncludeFiles(array $package, string $packageName): array
+    {
+        $extra = $package['extra'] ?? [];
+        $aiMateConfig = $extra['ai-mate'] ?? null;
+
+        if (null === $aiMateConfig || !\is_array($aiMateConfig)) {
+            return [];
+        }
+
+        $includes = $aiMateConfig['includes'] ?? [];
+
+        // Support single file as string
+        if (\is_string($includes)) {
+            $includes = [$includes];
+        }
+
+        if (!\is_array($includes)) {
+            $this->logger->warning('Invalid includes in ai-mate config', ['package' => $packageName]);
+
+            return [];
+        }
+
+        $validFiles = [];
+        foreach ($includes as $file) {
+            if (!\is_string($file) || '' === trim($file)) {
+                continue;
+            }
+
+            $fullPath = $this->rootDir.'/vendor/'.$packageName.'/'.ltrim($file, '/');
+            if (!file_exists($fullPath)) {
+                $this->logger->warning('Include file does not exist', [
+                    'package' => $packageName,
+                    'file' => $fullPath,
+                ]);
+                continue;
+            }
+
+            $validFiles[] = $fullPath;
+        }
+
+        return $validFiles;
     }
 }
