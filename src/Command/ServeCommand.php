@@ -102,6 +102,7 @@ class ServeCommand extends Command
         foreach ($this->config->scanDirs as $dir) {
             $dir = trim($dir);
             if ('' !== $dir) {
+                // TODO make sure it is inside the package.
                 $customDirs[] = $dir;
             }
         }
