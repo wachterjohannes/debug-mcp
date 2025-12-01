@@ -23,6 +23,7 @@ use Symfony\AI\Mate\Model\PluginFilter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Dotenv\Dotenv;
 
 /**
  * Start the MCP server.
@@ -46,8 +47,18 @@ class ServeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        // 1. Discover extensions with their filters and service files
+        // 0. Discover extensions with their filters and service files
         $extensions = $this->getExtensionsToLoad();
+
+        // 1. Load environment variables from .env files
+        if (null !== $this->config->envFile) {
+            $extra = [];
+            $localFile = $this->config->rootDir.\DIRECTORY_SEPARATOR.$this->config->envFile.\DIRECTORY_SEPARATOR.'.local';
+            if (!file_exists($localFile)) {
+                $extra[] = $localFile;
+            }
+            (new Dotenv())->load($this->config->rootDir.\DIRECTORY_SEPARATOR.$this->config->envFile, ...$extra);
+        }
 
         // 2. Build Symfony DI container with extension services
         $containerFactory = new ContainerFactory($this->logger);

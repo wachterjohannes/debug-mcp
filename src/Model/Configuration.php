@@ -25,7 +25,7 @@ final class Configuration
         public readonly string $cacheDir,
         public readonly array $scanDirs,
         public readonly array $enabledPlugins,
-        public readonly string|null $envFile,
+        public readonly ?string $envFile,
     ) {
     }
 
@@ -158,7 +158,7 @@ final class Configuration
             throw new ConfigurationException('Configuration key "cacheDir" must be a non-empty string');
         }
 
-        if ((!\is_string($config['envFile']) && null !== $config['envFile']) || $config['envFile'] === '') {
+        if ((!\is_string($config['envFile']) && null !== $config['envFile']) || '' === $config['envFile']) {
             throw new ConfigurationException('Configuration key "envFile" must be a non-empty string or null');
         }
         if (null !== $config['envFile'] && !class_exists(Dotenv::class)) {
