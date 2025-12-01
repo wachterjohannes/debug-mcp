@@ -33,6 +33,7 @@
         "ext-simplexml": "*",
         "php-cs-fixer/shim": "^3.75",
         "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^11.5",
         "symfony/dotenv": "^5.4|^6.4|^7.4|^8.0"
     },
     "conflict": {
