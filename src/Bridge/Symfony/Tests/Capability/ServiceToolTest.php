@@ -1,0 +1,30 @@
+<?php
+
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\AI\Mate\Bridge\Symfony\Tests\Capability;
+
+use PHPUnit\Framework\TestCase;
+use Symfony\AI\Mate\Bridge\Symfony\Service\ContainerProvider;
+use Symfony\AI\Mate\Bridge\Symfony\Capability\ServiceTool;
+
+class ServiceToolTest extends TestCase
+{
+    public function testAetAllServices(): void
+    {
+        $tool = new ServiceTool(
+            dirname(__DIR__).'/Fixtures',
+            new ContainerProvider()
+        );
+
+        $output = $tool->getAllServices();
+        self::assertCount(6, $output);
+    }
+}

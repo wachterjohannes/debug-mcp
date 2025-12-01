@@ -14,6 +14,6 @@ namespace Symfony\AI\Mate\Exception;
 /**
  * Exception thrown when configuration is invalid.
  */
-class ConfigurationException extends \InvalidArgumentException
+class ConfigurationException extends \InvalidArgumentException implements ExceptionInterface
 {
 }

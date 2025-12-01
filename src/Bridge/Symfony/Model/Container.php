@@ -1,0 +1,30 @@
+<?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Symfony\AI\Mate\Bridge\Symfony\Model;
+
+/**
+ * @internal
+ */
+class Container
+{
+    public function __construct(
+        /**
+         * @var array<string, ServiceDefinition>
+         */
+        public array $services,
+    ) {
+    }
+}
+//  array<string, Symfony\AI\Mate\Bridge\Symfony\Model\ServiceDefinition>,
+//  array<Symfony\AI\Mate\Bridge\Symfony\Model\ServiceDefinition> given.

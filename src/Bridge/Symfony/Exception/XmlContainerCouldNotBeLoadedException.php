@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -9,9 +11,11 @@
  * file that was distributed with this source code.
  */
 
-return [
-    'cache_dir' => sys_get_temp_dir().'/mcp',
-    'scan_dirs' => ['mcp'],
-    'env_file' => null,
-    'enabled_plugins' => [],
-];
+namespace Symfony\AI\Mate\Bridge\Symfony\Exception;
+
+/**
+ * @internal
+ */
+class XmlContainerCouldNotBeLoadedException extends \InvalidArgumentException implements ExceptionInterface
+{
+}
