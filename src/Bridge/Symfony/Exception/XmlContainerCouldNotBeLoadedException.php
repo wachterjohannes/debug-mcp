@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -9,11 +11,11 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\AI\Mate\Exception;
+namespace Symfony\AI\Mate\Bridge\Symfony\Exception;
 
 /**
- * Exception thrown when configuration is invalid.
+ * @internal
  */
-class ConfigurationException extends \InvalidArgumentException implements ExceptionInterface
+class XmlContainerCouldNotBeLoadedException extends \InvalidArgumentException implements ExceptionInterface
 {
 }

@@ -42,7 +42,7 @@ final class Configuration
         $rootDir = $config['rootDir'];
         /** @var string $cacheDir */
         $cacheDir = $config['cacheDir'];
-        /** @var string|null $cacheDir */
+        /** @var string|null $envFile */
         $envFile = $config['envFile'];
         /** @var array<string> $scanDirs */
         $scanDirs = $config['scanDirs'];

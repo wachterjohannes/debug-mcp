@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<container xmlns="http://symfony.com/schema/dic/services" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://symfony.com/schema/dic/services https://symfony.com/schema/dic/services/services-1.0.xsd">
+  <parameters>
+    <parameter key="kernel.project_dir">/home/docker/services/eneba/image-processor/app</parameter>
+    <parameter key="kernel.environment">dev</parameter>
+  </parameters>
+  <services>
+    <service id="service_container" class="Symfony\Component\DependencyInjection\ContainerInterface" public="true" synthetic="true"/>
+    <service id="kernel" class="App\Kernel" public="true" synthetic="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="routing.route_loader"/>
+    </service>
+
+    <service id="App\ImageResizer\ImageProcessorInterface" alias="App\ImageResizer\Imagemagick"/>
+    <service id="App\ImageResizer\Imagemagick" class="App\ImageResizer\Imagemagick" autowire="true" autoconfigure="true">
+    </service>
+
+    <service id="App\Service\Foo" class="App\Service\Foo" constructor="create" autowire="true" autoconfigure="true">
+    </service>
+
+    <service id="App\Service\Bar" class="App\Service\Bar" autowire="true" autoconfigure="true">
+      <factory class="App\Service\Baz" method="create"/>
+    </service>
+
+
+    <!-- Lonely alias without a real service -->
+    <service id="cache.default_doctrine_dbal_provider" alias="database_connection"/>
+  </services>
+</container>
