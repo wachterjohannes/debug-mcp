@@ -3,3 +3,6 @@ parameters:
     paths:
         - src
         - mcp
+    excludePaths:
+        analyseAndScan:
+            - src/Bridge/Symfony/vendor (?)

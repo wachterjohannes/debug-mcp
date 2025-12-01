@@ -20,6 +20,7 @@ use Symfony\AI\Mate\Bridge\Symfony\Model\ServiceTag;
 
 /**
  * This will parse a App_KernelDevDebugContainer.xml and return value objects.
+ *
  * @author Tobias Nyholm <tobias.nyholm@gmail.com>
  */
 class ContainerProvider
@@ -53,7 +54,7 @@ class ContainerProvider
         /** @var ServiceDefinition[] $aliases */
         $aliases = [];
 
-        if (isset($xml->services) && $xml->services instanceof \Countable && \count($xml->services) > 0) {
+        if (isset($xml->services) && \count($xml->services) > 0) {
             foreach ($xml->services->service as $def) {
                 /** @var \SimpleXMLElement $attrs */
                 $attrs = $def->attributes();

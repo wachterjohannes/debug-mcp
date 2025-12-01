@@ -12,19 +12,19 @@
 namespace Symfony\AI\Mate\Bridge\Symfony\Tests\Capability;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\AI\Mate\Bridge\Symfony\Service\ContainerProvider;
 use Symfony\AI\Mate\Bridge\Symfony\Capability\ServiceTool;
+use Symfony\AI\Mate\Bridge\Symfony\Service\ContainerProvider;
 
 class ServiceToolTest extends TestCase
 {
     public function testAetAllServices(): void
     {
         $tool = new ServiceTool(
-            dirname(__DIR__).'/Fixtures',
+            \dirname(__DIR__).'/Fixtures',
             new ContainerProvider()
         );
 
         $output = $tool->getAllServices();
-        self::assertCount(6, $output);
+        $this->assertCount(6, $output);
     }
 }

@@ -38,6 +38,6 @@ $config = include dirname(__DIR__).'/src/default.config.php';
 use Symfony\AI\Mate\App;
 use Symfony\AI\Mate\Model\Configuration;
 
-$config = Configuration::fromArray(array_merge(['rootDir' => $root], $config, $userConfig));
+$config = Configuration::fromArray(array_merge(['root_dir' => $root], $config, $userConfig));
 
 App::build($config)->run();
