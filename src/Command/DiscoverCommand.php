@@ -23,7 +23,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
  * Discover MCP extensions installed via Composer.
  *
  * Scans for packages with type "ai-mate-extension"
- * and suggests adding them to the enabled_plugins configuration.
+ * and suggests adding them to the enabledPlugins configuration.
  */
 class DiscoverCommand extends Command
 {
@@ -77,7 +77,7 @@ class DiscoverCommand extends Command
         $io->writeln(<<<PHP
 return [
     // ...
-    'enabled_plugins' => [
+    'enabledPlugins' => [
         '$content',
     ],
 ];

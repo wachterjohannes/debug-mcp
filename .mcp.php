@@ -2,7 +2,7 @@
 
 return [
     'cacheDir' => __DIR__.'/cache',
-    'enabled_plugins' => [
+    'enabledPlugins' => [
         // package vendors
     ],
 ];

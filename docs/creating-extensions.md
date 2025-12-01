@@ -65,7 +65,7 @@ Add to `.mcp.php`:
 
 ```php
 return [
-    'enabled_plugins' => [
+    'enabledPlugins' => [
         // Include all capabilities from package
         'vendor/my-extension',
 
@@ -151,11 +151,11 @@ Use `%env(VAR_NAME)%` syntax in service configuration to reference environment v
 - `include_only`: Only load specific class names (string or array)
 - Cannot use both `exclude` and `include_only` for same package
 
-**Security:** Extensions must be whitelisted in `enabled_plugins`
+**Security:** Extensions must be whitelisted in `enabledPlugins`
 
 ## Troubleshooting
 
 - **Not discovered?** Check `type: "ai-mate-extension"` in composer.json
-- **Not loaded?** Add package to `enabled_plugins` in .mcp.php
+- **Not loaded?** Add package to `enabledPlugins` in .mcp.php
 - **Capabilities not found?** Verify MCP attributes and scan directories
 - **Dependency not found?** Check services.php or ensure interface has implementation
