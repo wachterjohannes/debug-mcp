@@ -43,7 +43,10 @@
     },
 
     "config": {
-        "sort-packages": true
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
     },
     "extra": {
         "ai-mate": {
@@ -59,5 +62,14 @@
             "name": "symfony/ai",
             "url": "https://github.com/symfony/ai"
         }
-    }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../..",
+            "options": {
+                "symlink": true
+            }
+        }
+    ]
 }

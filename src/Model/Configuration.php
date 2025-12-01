@@ -39,7 +39,7 @@ final class Configuration
         self::validate($config);
 
         /** @var string $rootDir */
-        $rootDir = $config['rootDir'];
+        $rootDir = $config['root_dir'];
         /** @var string $cacheDir */
         $cacheDir = $config['cache_dir'];
         /** @var string|null $envFile */
@@ -143,15 +143,15 @@ final class Configuration
      */
     private static function validate(array $config): void
     {
-        $requiredKeys = ['rootDir', 'cache_dir', 'scan_dirs', 'env_file'];
+        $requiredKeys = ['root_dir', 'cache_dir', 'scan_dirs', 'env_file'];
         $missingKeys = array_diff($requiredKeys, array_keys($config));
 
         if ([] !== $missingKeys) {
             throw new ConfigurationException(\sprintf('Missing required configuration keys: %s', implode(', ', $missingKeys)));
         }
 
-        if (!\is_string($config['rootDir']) || '' === $config['rootDir']) {
-            throw new ConfigurationException('Configuration key "rootDir" must be a non-empty string');
+        if (!\is_string($config['root_dir']) || '' === $config['root_dir']) {
+            throw new ConfigurationException('Configuration key "root_dir" must be a non-empty string');
         }
 
         if (!\is_string($config['cache_dir']) || '' === $config['cache_dir']) {

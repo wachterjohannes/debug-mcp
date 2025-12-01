@@ -26,5 +26,3 @@ class Container
     ) {
     }
 }
-//  array<string, Symfony\AI\Mate\Bridge\Symfony\Model\ServiceDefinition>,
-//  array<Symfony\AI\Mate\Bridge\Symfony\Model\ServiceDefinition> given.
