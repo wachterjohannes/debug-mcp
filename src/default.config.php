@@ -12,5 +12,6 @@
 return [
     'cacheDir' => sys_get_temp_dir().'/mcp',
     'scanDirs' => ['mcp'],
-    'enabled_plugins' => [],
+    'envFile' => null,
+    'enabledPlugins' => [],
 ];
