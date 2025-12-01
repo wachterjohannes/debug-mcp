@@ -41,14 +41,14 @@ final class Configuration
         /** @var string $rootDir */
         $rootDir = $config['rootDir'];
         /** @var string $cacheDir */
-        $cacheDir = $config['cacheDir'];
+        $cacheDir = $config['cache_dir'];
         /** @var string|null $envFile */
-        $envFile = $config['envFile'];
+        $envFile = $config['env_file'];
         /** @var array<string> $scanDirs */
-        $scanDirs = $config['scanDirs'];
+        $scanDirs = $config['scan_dirs'];
 
         /** @var array<string|int, string|array{exclude?: string|string[], include_only?: string|string[]}> $rawPlugins */
-        $rawPlugins = $config['enabledPlugins'] ?? [];
+        $rawPlugins = $config['enabled_plugins'] ?? [];
         $enabledPlugins = self::parseEnabledPlugins($rawPlugins);
 
         return new self(
@@ -143,7 +143,7 @@ final class Configuration
      */
     private static function validate(array $config): void
     {
-        $requiredKeys = ['rootDir', 'cacheDir', 'scanDirs', 'envFile'];
+        $requiredKeys = ['rootDir', 'cache_dir', 'scan_dirs', 'env_file'];
         $missingKeys = array_diff($requiredKeys, array_keys($config));
 
         if ([] !== $missingKeys) {
@@ -154,28 +154,28 @@ final class Configuration
             throw new ConfigurationException('Configuration key "rootDir" must be a non-empty string');
         }
 
-        if (!\is_string($config['cacheDir']) || '' === $config['cacheDir']) {
+        if (!\is_string($config['cache_dir']) || '' === $config['cache_dir']) {
             throw new ConfigurationException('Configuration key "cacheDir" must be a non-empty string');
         }
 
-        if ((!\is_string($config['envFile']) && null !== $config['envFile']) || '' === $config['envFile']) {
+        if ((!\is_string($config['env_file']) && null !== $config['env_file']) || '' === $config['env_file']) {
             throw new ConfigurationException('Configuration key "envFile" must be a non-empty string or null');
         }
-        if (null !== $config['envFile'] && !class_exists(Dotenv::class)) {
+        if (null !== $config['env_file'] && !class_exists(Dotenv::class)) {
             throw new ConfigurationException('Configuring key "envFile" requires symfony/dotenv package. Try running "composer require symfony/dotenv".');
         }
 
-        if (!\is_array($config['scanDirs'])) {
+        if (!\is_array($config['scan_dirs'])) {
             throw new ConfigurationException('Configuration key "scanDirs" must be an array');
         }
 
-        foreach ($config['scanDirs'] as $index => $scanDir) {
+        foreach ($config['scan_dirs'] as $index => $scanDir) {
             if (!\is_string($scanDir) || '' === $scanDir) {
                 throw new ConfigurationException(\sprintf('Configuration key "scanDirs[%s]" must be a non-empty string', $index));
             }
         }
 
-        if (isset($config['enabledPlugins']) && !\is_array($config['enabledPlugins'])) {
+        if (isset($config['enabled_plugins']) && !\is_array($config['enabled_plugins'])) {
             throw new ConfigurationException('Configuration key "enabledPlugins" must be an array');
         }
     }

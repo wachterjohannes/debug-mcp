@@ -10,8 +10,8 @@
  */
 
 return [
-    'cacheDir' => sys_get_temp_dir().'/mcp',
-    'scanDirs' => ['mcp'],
-    'envFile' => null,
-    'enabledPlugins' => [],
+    'cache_dir' => sys_get_temp_dir().'/mcp',
+    'scan_dirs' => ['mcp'],
+    'env_file' => null,
+    'enabled_plugins' => [],
 ];

@@ -56,7 +56,7 @@ Edit `.mcp.php` in your project root to configure AI Mate:
 
 return [
     // Whitelist vendor plugins (security: none enabled by default)
-    'enabledPlugins' => [
+    'enabled_plugins' => [
         'vendor/package-name',
     ],
 
@@ -80,7 +80,7 @@ return [
 3. Add to `.mcp.php`:
    ```php
    // .mcp.php
-   'enabledPlugins' => [
+   'enabled_plugins' => [
        'vendor/symfony-tools',
    ],
    ```
@@ -121,7 +121,7 @@ vendor/bin/mate clear-cache
 
 ## Security
 
-For security, no vendor plugins are enabled by default. You must explicitly whitelist packages in the `enabledPlugins`
+For security, no vendor plugins are enabled by default. You must explicitly whitelist packages in the `enabled_plugins`
 configuration.
 
 Local `mcp/` directory is always enabled for rapid development.

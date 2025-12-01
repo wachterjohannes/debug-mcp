@@ -1,8 +1,8 @@
 <?php
 
 return [
-    'cacheDir' => __DIR__.'/cache',
-    'enabledPlugins' => [
+    'cache_dir' => __DIR__.'/cache',
+    'enabled_plugins' => [
         // package vendors
     ],
 ];

@@ -77,7 +77,7 @@ class DiscoverCommand extends Command
         $io->writeln(<<<PHP
 return [
     // ...
-    'enabledPlugins' => [
+    'enabled_plugins' => [
         '$content',
     ],
 ];

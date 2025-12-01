@@ -65,7 +65,7 @@ Add to `.mcp.php`:
 
 ```php
 return [
-    'enabledPlugins' => [
+    'enabled_plugins' => [
         // Include all capabilities from package
         'vendor/my-extension',
 
@@ -154,12 +154,12 @@ FIXME: Should we really require this? What if a package (library) want to have o
 - Cannot use both `exclude` and `include_only` for same package
 FIXME: Should we out source this to the extension instead? Ie, let them provide config to disable?
 
-**Security:** Extensions must be whitelisted in `enabledPlugins`
+**Security:** Extensions must be whitelisted in `enabled_plugins`
 FIXME: I like this. But maybe we must improve our "discover" command to automatically add plugins
 
 ## Troubleshooting
 
 - **Not discovered?** Check `type: "ai-mate-extension"` in composer.json
-- **Not loaded?** Add package to `enabledPlugins` in .mcp.php
+- **Not loaded?** Add package to `enabled_plugins` in .mcp.php
 - **Capabilities not found?** Verify MCP attributes and scan directories
 - **Dependency not found?** Check services.php or ensure interface has implementation
