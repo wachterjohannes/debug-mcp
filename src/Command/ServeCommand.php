@@ -16,6 +16,7 @@ use Mcp\Server;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StdioTransport;
 use Psr\Log\LoggerInterface;
+use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
 use Symfony\AI\Mate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -26,11 +27,14 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class ServeCommand extends Command
 {
+    private ComposerTypeDiscovery $discovery;
+
     public function __construct(
         private LoggerInterface $logger,
         private Configuration $config,
     ) {
         parent::__construct(self::getDefaultName());
+        $this->discovery = new ComposerTypeDiscovery($config->rootDir, $logger);
     }
 
     public static function getDefaultName(): ?string
@@ -62,17 +66,28 @@ class ServeCommand extends Command
      */
     private function getDirectoriesToScan(): array
     {
-        $rootDir = $this->config->rootDir;
-        $scanDirs = array_filter(array_map(function ($item) use ($rootDir) {
-            if (!is_dir($rootDir.'/vendor/'.$item)) {
-                $this->logger->error('Plugin "'.$item.'" not found');
+        $scanDirs = [];
 
-                return null;
+        // 1. Discover Composer-based extensions (with whitelist and filters)
+        $extensions = $this->discovery->discover($this->config->enabledPlugins);
+        foreach ($extensions as $packageName => $data) {
+            foreach ($data['dirs'] as $dir) {
+                $scanDirs[] = $dir;
             }
 
-            return 'vendor/'.$item;
-        }, $this->config->enabledPlugins));
+            // TODO: Apply filters from $data['filter'] during capability discovery
+            // This requires integration with MCP SDK's Container/Registry system
+            // See: https://github.com/wachterjohannes/debug-mcp/issues/7
+            if ($data['filter']->hasFilters()) {
+                $this->logger->debug('Plugin has filters configured', [
+                    'package' => $packageName,
+                    'exclude' => $data['filter']->exclude,
+                    'include_only' => $data['filter']->includeOnly,
+                ]);
+            }
+        }
 
+        // 2. Add custom scan directories from configuration
         foreach ($this->config->scanDirs as $dir) {
             $dir = trim($dir);
             if ('' !== $dir) {
@@ -80,8 +95,8 @@ class ServeCommand extends Command
             }
         }
 
-        // '/mcp' here refers to this project's MCP features
-        $scanDirs[] = substr(\dirname(__DIR__, 2).'/mcp', \strlen($rootDir));
+        // 3. Always include local mcp/ directory (trusted project code)
+        $scanDirs[] = substr(\dirname(__DIR__, 2).'/mcp', \strlen($this->config->rootDir));
 
         return $scanDirs;
     }
