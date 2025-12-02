@@ -79,8 +79,16 @@ class DiscoverCommand extends Command
         $finalExtensions = [];
         foreach ($extensions as $packageName => $data) {
             // Preserve existing enabled state, default to true for new packages
+            $enabled = true;
+            if (isset($existingExtensions[$packageName]) && \is_array($existingExtensions[$packageName])) {
+                $enabled = $existingExtensions[$packageName]['enabled'] ?? true;
+                if (!\is_bool($enabled)) {
+                    $enabled = true;
+                }
+            }
+
             $finalExtensions[$packageName] = [
-                'enabled' => $existingExtensions[$packageName]['enabled'] ?? true,
+                'enabled' => $enabled,
             ];
         }
 

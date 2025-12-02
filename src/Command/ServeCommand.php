@@ -38,6 +38,7 @@ class ServeCommand extends Command
     ) {
         parent::__construct(self::getDefaultName());
         $rootDir = $container->getParameter('mate.root_dir');
+        \assert(\is_string($rootDir));
         $this->discovery = new ComposerTypeDiscovery($rootDir, $logger);
     }
 
@@ -48,17 +49,25 @@ class ServeCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
+        $rootDir = $this->container->getParameter('mate.root_dir');
+        \assert(\is_string($rootDir));
+
+        $cacheDir = $this->container->getParameter('mate.cache_dir');
+        \assert(\is_string($cacheDir));
+
+        $envFile = $this->container->getParameter('mate.env_file');
+
         // 0. Discover extensions with their filters and service files
         $extensions = $this->getExtensionsToLoad();
 
         // 1. Load environment variables from .env files
-        if (null !== $this->container->getParameter('mate.env_file')) {
+        if (null !== $envFile && \is_string($envFile)) {
             $extra = [];
-            $localFile = $this->container->getParameter('mate.root_dir').\DIRECTORY_SEPARATOR.$this->container->getParameter('mate.env_file').\DIRECTORY_SEPARATOR.'.local';
+            $localFile = $rootDir.\DIRECTORY_SEPARATOR.$envFile.\DIRECTORY_SEPARATOR.'.local';
             if (!file_exists($localFile)) {
                 $extra[] = $localFile;
             }
-            (new Dotenv())->load($this->container->getParameter('mate.root_dir').\DIRECTORY_SEPARATOR.$this->container->getParameter('mate.env_file'), ...$extra);
+            (new Dotenv())->load($rootDir.\DIRECTORY_SEPARATOR.$envFile, ...$extra);
         }
 
         // 2. Build Symfony DI container with extension services
@@ -67,7 +76,7 @@ class ServeCommand extends Command
 
         // 3. Create filtered discovery loader
         $loader = new FilteredDiscoveryLoader(
-            basePath: $this->container->getParameter('mate.root_dir'),
+            basePath: $rootDir,
             extensions: $extensions,
             excludeDirs: [],
             logger: $this->logger,
@@ -86,7 +95,7 @@ class ServeCommand extends Command
             ->setContainer($container)
             ->addLoaders($loader)
             ->setDiscovery(\dirname(__DIR__).'/Capability')
-            ->setSession(new FileSessionStore($this->container->getParameter('mate.cache_dir').'/sessions'))
+            ->setSession(new FileSessionStore($cacheDir.'/sessions'))
             ->setLogger($this->logger)
             ->build();
 
@@ -103,20 +112,31 @@ class ServeCommand extends Command
      */
     private function getExtensionsToLoad(): array
     {
+        $rootDir = $this->container->getParameter('mate.root_dir');
+        \assert(\is_string($rootDir));
+
+        $enabledPlugins = $this->container->getParameter('mate.enabled_plugins');
+        \assert(\is_array($enabledPlugins));
+        /** @var array<int, string> $enabledPlugins */
+        $scanDirs = $this->container->getParameter('mate.scan_dirs');
+        \assert(\is_array($scanDirs));
+
         $extensions = [];
 
         // 1. Discover Composer-based extensions (with whitelist and filters)
-        foreach ($this->discovery->discover($this->container->getParameter('mate.enabled_plugins')) as $packageName => $data) {
+        foreach ($this->discovery->discover($enabledPlugins) as $packageName => $data) {
             $extensions[$packageName] = $data;
         }
 
         // 2. Add custom scan directories from configuration
         $customDirs = [];
-        foreach ($this->container->getParameter('mate.scan_dirs') as $dir) {
-            $dir = trim($dir);
-            if ('' !== $dir) {
-                // TODO make sure it is inside the package.
-                $customDirs[] = $dir;
+        foreach ($scanDirs as $dir) {
+            if (\is_string($dir)) {
+                $dir = trim($dir);
+                if ('' !== $dir) {
+                    // TODO make sure it is inside the package.
+                    $customDirs[] = $dir;
+                }
             }
         }
         if ([] !== $customDirs) {
@@ -128,7 +148,7 @@ class ServeCommand extends Command
         }
 
         // 3. Always include local mate/ directory (trusted project code)
-        $mateDir = substr(\dirname(__DIR__, 2).'/mate', \strlen($this->container->getParameter('mate.root_dir')));
+        $mateDir = substr(\dirname(__DIR__, 2).'/mate', \strlen($rootDir));
         $extensions['_local'] = [
             'dirs' => [$mateDir],
             'filter' => PluginFilter::all(),

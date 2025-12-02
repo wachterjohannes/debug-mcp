@@ -45,7 +45,7 @@ final class ComposerTypeDiscovery
     }
 
     /**
-     * @param array<string, PluginFilter> $enabledPlugins Package name => filter options
+     * @param array<int, string> $enabledPlugins List of enabled package names
      *
      * @return array<string, array{dirs: string[], filter: PluginFilter, includes: string[]}> Package name => dirs, filter, and include files
      */
@@ -66,7 +66,7 @@ final class ComposerTypeDiscovery
             }
 
             // Check if package is whitelisted
-            if ([] !== $enabledPlugins && !isset($enabledPlugins[$packageName])) {
+            if ([] !== $enabledPlugins && !\in_array($packageName, $enabledPlugins, true)) {
                 $this->logger->debug('Skipping non-whitelisted extension', ['package' => $packageName]);
 
                 continue;
@@ -74,11 +74,10 @@ final class ComposerTypeDiscovery
 
             $scanDirs = $this->extractScanDirs($package, $packageName);
             if ([] !== $scanDirs) {
-                $filter = $enabledPlugins[$packageName] ?? PluginFilter::all();
                 $includeFiles = $this->extractIncludeFiles($package, $packageName);
                 $extensions[$packageName] = [
                     'dirs' => $scanDirs,
-                    'filter' => $filter,
+                    'filter' => PluginFilter::all(),
                     'includes' => $includeFiles,
                 ];
             }

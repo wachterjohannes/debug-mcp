@@ -52,7 +52,7 @@ if (file_exists($root.'/.mate/extensions.php')) {
     $extensionsConfig = include $root.'/.mate/extensions.php';
     if (is_array($extensionsConfig)) {
         foreach ($extensionsConfig as $packageName => $config) {
-            if (is_array($config) && ($config['enabled'] ?? false)) {
+            if (is_string($packageName) && is_array($config) && ($config['enabled'] ?? false)) {
                 $enabledPlugins[] = $packageName;
             }
         }

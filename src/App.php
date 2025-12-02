@@ -25,9 +25,13 @@ final class App
     public static function build(ContainerBuilder $container): Application
     {
         $logger = $container->get(LoggerInterface::class);
+        \assert($logger instanceof LoggerInterface);
+
         $rootDir = $container->getParameter('mate.root_dir');
+        \assert(\is_string($rootDir));
+
         $cacheDir = $container->getParameter('mate.cache_dir');
-        $enabledPlugins = $container->getParameter('mate.enabled_plugins');
+        \assert(\is_string($cacheDir));
 
         $application = new Application('Symfony AI Mate', '0.1.0');
 

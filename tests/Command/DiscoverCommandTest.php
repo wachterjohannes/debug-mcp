@@ -36,6 +36,8 @@ class DiscoverCommandTest extends TestCase
             $this->assertIsArray($extensions);
             $this->assertArrayHasKey('vendor/package-a', $extensions);
             $this->assertArrayHasKey('vendor/package-b', $extensions);
+            $this->assertIsArray($extensions['vendor/package-a']);
+            $this->assertIsArray($extensions['vendor/package-b']);
             $this->assertTrue($extensions['vendor/package-a']['enabled']);
             $this->assertTrue($extensions['vendor/package-b']['enabled']);
 
@@ -71,6 +73,9 @@ PHP
             $tester->execute([]);
 
             $extensions = include $tempDir.'/.mate/extensions.php';
+            $this->assertIsArray($extensions);
+            $this->assertIsArray($extensions['vendor/package-a']);
+            $this->assertIsArray($extensions['vendor/package-b']);
             $this->assertFalse($extensions['vendor/package-a']['enabled'], 'Should preserve disabled state');
             $this->assertTrue($extensions['vendor/package-b']['enabled'], 'Should preserve enabled state');
         } finally {
@@ -100,6 +105,9 @@ PHP
             $tester->execute([]);
 
             $extensions = include $tempDir.'/.mate/extensions.php';
+            $this->assertIsArray($extensions);
+            $this->assertIsArray($extensions['vendor/package-a']);
+            $this->assertIsArray($extensions['vendor/package-b']);
             $this->assertFalse($extensions['vendor/package-a']['enabled'], 'Existing disabled state preserved');
             $this->assertTrue($extensions['vendor/package-b']['enabled'], 'New package defaults to enabled');
         } finally {
