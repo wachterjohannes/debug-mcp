@@ -125,10 +125,10 @@ class ServeCommand extends Command
             ];
         }
 
-        // 3. Always include local mcp/ directory (trusted project code)
-        $mcpDir = substr(\dirname(__DIR__, 2).'/mcp', \strlen($this->config->rootDir));
+        // 3. Always include local mate/ directory (trusted project code)
+        $mateDir = substr(\dirname(__DIR__, 2).'/mate', \strlen($this->config->rootDir));
         $extensions['_local'] = [
-            'dirs' => [$mcpDir],
+            'dirs' => [$mateDir],
             'filter' => PluginFilter::all(),
             'includes' => [],
         ];
