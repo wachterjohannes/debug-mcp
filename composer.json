@@ -45,8 +45,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Symfony\\AI\\Mate\\": "src/",
-            "Symfony\\AI\\Mate\\Mcp\\": "mcp/"
+            "Symfony\\AI\\Mate\\": "src/"
         }
     },
     "autoload-dev": {

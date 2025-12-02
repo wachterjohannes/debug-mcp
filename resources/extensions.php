@@ -1,8 +1,10 @@
 <?php
 
+// This file is managed by 'mate discover'
+// You can manually edit to enable/disable extensions
+
 return [
-    // 'env_file' => '.mcp.env', // This will also load '.mcp.env.local'
-    'enabled_plugins' => [
-        // package vendors
-    ],
+    // Extensions will be added automatically by 'mate discover'
+    // Example:
+    // 'vendor/package-name' => ['enabled' => true],
 ];

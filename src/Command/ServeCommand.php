@@ -18,11 +18,11 @@ use Psr\Log\LoggerInterface;
 use Symfony\AI\Mate\Container\ContainerFactory;
 use Symfony\AI\Mate\Container\FilteredDiscoveryLoader;
 use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
-use Symfony\AI\Mate\Model\Configuration;
 use Symfony\AI\Mate\Model\PluginFilter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Dotenv\Dotenv;
 
 /**
@@ -34,10 +34,11 @@ class ServeCommand extends Command
 
     public function __construct(
         private LoggerInterface $logger,
-        private Configuration $config,
+        private ContainerBuilder $container,
     ) {
         parent::__construct(self::getDefaultName());
-        $this->discovery = new ComposerTypeDiscovery($config->rootDir, $logger);
+        $rootDir = $container->getParameter('mate.root_dir');
+        $this->discovery = new ComposerTypeDiscovery($rootDir, $logger);
     }
 
     public static function getDefaultName(): ?string
@@ -51,13 +52,13 @@ class ServeCommand extends Command
         $extensions = $this->getExtensionsToLoad();
 
         // 1. Load environment variables from .env files
-        if (null !== $this->config->envFile) {
+        if (null !== $this->container->getParameter('mate.env_file')) {
             $extra = [];
-            $localFile = $this->config->rootDir.\DIRECTORY_SEPARATOR.$this->config->envFile.\DIRECTORY_SEPARATOR.'.local';
+            $localFile = $this->container->getParameter('mate.root_dir').\DIRECTORY_SEPARATOR.$this->container->getParameter('mate.env_file').\DIRECTORY_SEPARATOR.'.local';
             if (!file_exists($localFile)) {
                 $extra[] = $localFile;
             }
-            (new Dotenv())->load($this->config->rootDir.\DIRECTORY_SEPARATOR.$this->config->envFile, ...$extra);
+            (new Dotenv())->load($this->container->getParameter('mate.root_dir').\DIRECTORY_SEPARATOR.$this->container->getParameter('mate.env_file'), ...$extra);
         }
 
         // 2. Build Symfony DI container with extension services
@@ -66,7 +67,7 @@ class ServeCommand extends Command
 
         // 3. Create filtered discovery loader
         $loader = new FilteredDiscoveryLoader(
-            basePath: $this->config->rootDir,
+            basePath: $this->container->getParameter('mate.root_dir'),
             extensions: $extensions,
             excludeDirs: [],
             logger: $this->logger,
@@ -84,7 +85,8 @@ class ServeCommand extends Command
             ->setServerInfo('ai-mate', '0.1.0', 'Symfony AI development assistant MCP server')
             ->setContainer($container)
             ->addLoaders($loader)
-            ->setSession(new FileSessionStore($this->config->cacheDir.'/sessions'))
+            ->setDiscovery(\dirname(__DIR__).'/Capability')
+            ->setSession(new FileSessionStore($this->container->getParameter('mate.cache_dir').'/sessions'))
             ->setLogger($this->logger)
             ->build();
 
@@ -104,13 +106,13 @@ class ServeCommand extends Command
         $extensions = [];
 
         // 1. Discover Composer-based extensions (with whitelist and filters)
-        foreach ($this->discovery->discover($this->config->enabledPlugins) as $packageName => $data) {
+        foreach ($this->discovery->discover($this->container->getParameter('mate.enabled_plugins')) as $packageName => $data) {
             $extensions[$packageName] = $data;
         }
 
         // 2. Add custom scan directories from configuration
         $customDirs = [];
-        foreach ($this->config->scanDirs as $dir) {
+        foreach ($this->container->getParameter('mate.scan_dirs') as $dir) {
             $dir = trim($dir);
             if ('' !== $dir) {
                 // TODO make sure it is inside the package.
@@ -126,7 +128,7 @@ class ServeCommand extends Command
         }
 
         // 3. Always include local mate/ directory (trusted project code)
-        $mateDir = substr(\dirname(__DIR__, 2).'/mate', \strlen($this->config->rootDir));
+        $mateDir = substr(\dirname(__DIR__, 2).'/mate', \strlen($this->container->getParameter('mate.root_dir')));
         $extensions['_local'] = [
             'dirs' => [$mateDir],
             'filter' => PluginFilter::all(),
