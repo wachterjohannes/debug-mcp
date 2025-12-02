@@ -107,7 +107,7 @@ class ContainerProvider
 
         foreach ($aliases as $service) {
             $alias = $service->alias;
-            if (null !== $alias && !isset($services[$alias])) {
+            if (null === $alias || !isset($services[$alias])) {
                 continue;
             }
 
