@@ -15,21 +15,20 @@ use Psr\Log\LoggerInterface;
 use Symfony\AI\Mate\Model\PluginFilter;
 
 /**
- * Discovers MCP extensions via Composer package type.
+ * Discovers MCP extensions via extra.ai-mate config in composer.json.
  *
  * Extensions must declare themselves in composer.json:
  * {
- *   "type": "ai-mate-extension",
  *   "extra": {
  *     "ai-mate": {
- *       "scan-dirs": ["src"]
+ *       "scan-dirs": ["src"],
+ *       "includes": ["config/services.php"]
  *     }
  *   }
  * }
  */
 final class ComposerTypeDiscovery
 {
-    private const PACKAGE_TYPE = 'ai-mate-extension';
 
     /**
      * @var array<string, array{
@@ -57,11 +56,15 @@ final class ComposerTypeDiscovery
         $extensions = [];
 
         foreach ($installed as $package) {
-            if (self::PACKAGE_TYPE !== $package['type']) {
+            $packageName = $package['name'];
+
+            // Check if package has ai-mate config in extra section
+            $extra = $package['extra'] ?? [];
+            $aiMateConfig = $extra['ai-mate'] ?? null;
+
+            if (null === $aiMateConfig || !\is_array($aiMateConfig)) {
                 continue;
             }
-
-            $packageName = $package['name'];
 
             // Check if package is whitelisted
             if ([] !== $enabledPlugins && !isset($enabledPlugins[$packageName])) {
@@ -136,10 +139,6 @@ final class ComposerTypeDiscovery
                 continue;
             }
 
-            if (!isset($package['type']) || !\is_string($package['type'])) {
-                continue;
-            }
-
             /** @var array{
              *     name: string,
              *     type: string,
@@ -147,7 +146,7 @@ final class ComposerTypeDiscovery
              * } $validPackage */
             $validPackage = [
                 'name' => $package['name'],
-                'type' => $package['type'],
+                'type' => $package['type'] ?? '',
             ];
 
             if (isset($package['extra']) && \is_array($package['extra'])) {

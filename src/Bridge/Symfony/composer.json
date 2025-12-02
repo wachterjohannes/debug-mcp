@@ -2,7 +2,7 @@
     "name": "symfony/ai-mate-symfony",
     "description": "Symfony integration with Mate AI.",
     "license": "MIT",
-    "type": "ai-mate-extension",
+    "type": "library",
     "keywords": [
         "ai",
         "bridge",

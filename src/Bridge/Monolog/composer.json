@@ -2,7 +2,7 @@
     "name": "symfony/ai-mate-monolog",
     "description": "Monolog integration with Mate AI for log searching and analysis.",
     "license": "MIT",
-    "type": "ai-mate-extension",
+    "type": "library",
     "keywords": [
         "ai",
         "bridge",
