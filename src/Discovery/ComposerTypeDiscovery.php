@@ -29,7 +29,6 @@ use Symfony\AI\Mate\Model\PluginFilter;
  */
 final class ComposerTypeDiscovery
 {
-
     /**
      * @var array<string, array{
      *     name: string,
