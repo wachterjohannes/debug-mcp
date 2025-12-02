@@ -5,4 +5,5 @@ parameters:
         - mcp
     excludePaths:
         analyseAndScan:
+            - src/Bridge/Monolog/vendor (?)
             - src/Bridge/Symfony/vendor (?)

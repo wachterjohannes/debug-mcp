@@ -1,0 +1,75 @@
+{
+    "name": "symfony/ai-mate-monolog",
+    "description": "Monolog integration with Mate AI for log searching and analysis.",
+    "license": "MIT",
+    "type": "ai-mate-extension",
+    "keywords": [
+        "ai",
+        "bridge",
+        "mate",
+        "monolog",
+        "logging"
+    ],
+    "authors": [
+        {
+            "name": "Johannes Wachter",
+            "email": "johannes@sulu.io"
+        },
+        {
+            "name": "Tobias Nyholm",
+            "email": "tobias.nyholm@gmail.com"
+        },
+        {
+            "name": "Symfony Community",
+            "homepage": "https://symfony.com/contributors"
+        }
+    ],
+    "require": {
+        "php": ">=8.2",
+        "symfony/ai-mate": "@dev"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5.13"
+    },
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Symfony\\AI\\Mate\\Bridge\\Monolog\\": ""
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Symfony\\AI\\Mate\\Bridge\\Monolog\\Tests\\": "Tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "php-http/discovery": true
+        }
+    },
+    "extra": {
+        "ai-mate": {
+            "scan-dirs": ["Capability"],
+            "includes": [
+                "config/services.php"
+            ]
+        },
+        "branch-alias": {
+            "dev-main": "0.x-dev"
+        },
+        "thanks": {
+            "name": "symfony/ai",
+            "url": "https://github.com/symfony/ai"
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../../..",
+            "options": {
+                "symlink": true
+            }
+        }
+    ]
+}
