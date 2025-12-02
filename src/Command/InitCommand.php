@@ -39,7 +39,13 @@ class InitCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $root = $this->config->rootDir;
-        $filePath = $root.'/.mcp.php';
+        $mateDir = $root.'/.mate';
+        $filePath = $mateDir.'/extensions.php';
+
+        if (!is_dir($mateDir)) {
+            mkdir($mateDir, 0755, true);
+        }
+
         if (file_exists($filePath)) {
             if ($io->confirm('File already exists. Overwrite? (y/n)', false)) {
                 unlink($filePath);
@@ -56,7 +62,7 @@ class InitCommand extends Command
 
     private function addConfigFile(SymfonyStyle $io, string $filePath): void
     {
-        copy(__DIR__.'/../../resources/.mcp.php', $filePath);
+        copy(__DIR__.'/../../resources/extensions.php', $filePath);
         $io->success(\sprintf('Wrote config file to "%s"', $filePath));
     }
 }

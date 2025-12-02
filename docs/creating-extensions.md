@@ -9,18 +9,10 @@ MCP extensions are Composer packages that declare themselves using a specific pa
 ```json
 {
   "name": "vendor/my-extension",
-  "type": "ai-mate-extension",
+  "type": "library",
   "require": {
     "symfony/ai-mate": "^1.0"
-  }
-}
-```
-
-**Optional:** Specify custom scan directories (defaults to package root):
-
-```json
-{
-  "type": "ai-mate-extension",
+  },
   "extra": {
     "ai-mate": {
       "scan-dirs": ["src", "lib"]
@@ -28,6 +20,8 @@ MCP extensions are Composer packages that declare themselves using a specific pa
   }
 }
 ```
+
+The `extra.ai-mate` section is required for your package to be discovered as an extension.
 
 ### 2. Create MCP Capabilities
 
@@ -61,7 +55,7 @@ composer require vendor/my-extension
 php bin/mate.php discover
 ```
 
-Add to `.mcp.php`:
+Add to `.mate/extensions.php`:
 
 ```php
 return [

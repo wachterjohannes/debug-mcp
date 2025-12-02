@@ -20,8 +20,8 @@ foreach ($autoloadPaths as $autoloadPath) {
     if (file_exists($autoloadPath)) {
         require_once $autoloadPath;
         $root = dirname(realpath($autoloadPath), 2);
-        if (file_exists($root . '/.mcp.php')) {
-            $userConfig = include $root . '/.mcp.php';
+        if (file_exists($root . '/.mate/extensions.php')) {
+            $userConfig = include $root . '/.mate/extensions.php';
         }
 
         break;

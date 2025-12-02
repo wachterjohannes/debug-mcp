@@ -24,15 +24,15 @@ See how to integrate with your AI tool in the [integration guide](integration.md
 
 ## How to add features?
 
-The easiest way is to create a `mcp` folder next to your `src` and `tests` directories, then add classes with `#[McpTool]`
+The easiest way is to create a `mate` folder next to your `src` and `tests` directories, then add classes with `#[McpTool]`
 attributes.
 
 Example:
 
 ```php
 <?php
-// mcp/MyTool.php
-namespace App\Mcp;
+// mate/MyTool.php
+namespace App\Mate;
 
 use Mcp\Capability\Attribute\McpTool;
 
@@ -48,11 +48,11 @@ class MyTool
 
 ## Configuration
 
-Edit `.mcp.php` in your project root to configure AI Mate:
+Edit `.mate/extensions.php` in your project root to configure AI Mate:
 
 ```php
 <?php
-// .mcp.php
+// .mate/extensions.php
 
 return [
     // Whitelist vendor plugins (security: none enabled by default)
@@ -61,7 +61,7 @@ return [
     ],
 
     // Local directories to scan (always enabled)
-    'scanDir' => ['mcp'],
+    'scanDir' => ['mate'],
 ];
 ```
 
@@ -77,9 +77,9 @@ return [
    vendor/bin/mate discover
    ```
 
-3. Add to `.mcp.php`:
+3. Add to `.mate/extensions.php`:
    ```php
-   // .mcp.php
+   // .mate/extensions.php
    'enabled_plugins' => [
        'vendor/symfony-tools',
    ],
@@ -89,7 +89,7 @@ return [
 
 ### Init
 
-Initialize `.mcp.php` configuration file:
+Initialize `.mate/extensions.php` configuration file:
 
 ```bash
 vendor/bin/mate init
@@ -124,4 +124,4 @@ vendor/bin/mate clear-cache
 For security, no vendor plugins are enabled by default. You must explicitly whitelist packages in the `enabled_plugins`
 configuration.
 
-Local `mcp/` directory is always enabled for rapid development.
+Local `mate/` directory is always enabled for rapid development.
