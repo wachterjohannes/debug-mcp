@@ -28,7 +28,7 @@ if (!$root) {
 }
 
 // Set root directory as environment variable for container
-putenv('MATE_ROOT_DIR='.$root);
+$_ENV=['MATE_ROOT_DIR'] = $root
 
 use Symfony\AI\Mate\App;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
