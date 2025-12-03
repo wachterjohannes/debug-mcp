@@ -6,5 +6,5 @@
 return [
     // Extensions will be added automatically by 'mate discover'
     // Example:
-    // 'vendor/package-name' => ['enabled' => true],
+    'symfony/ai-mate' => ['enabled' => true],
 ];
