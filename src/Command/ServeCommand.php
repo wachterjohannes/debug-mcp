@@ -17,7 +17,7 @@ use Mcp\Server\Transport\StdioTransport;
 use Psr\Log\LoggerInterface;
 use Symfony\AI\Mate\Container\FilteredDiscoveryLoader;
 use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
-use Symfony\AI\Mate\Model\PluginFilter;
+use Symfony\AI\Mate\Model\ExtensionFilter;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -103,7 +103,7 @@ class ServeCommand extends Command
     /**
      * Get all extensions to load with their scan directories and filters.
      *
-     * @return array<string, array{dirs: string[], filter: PluginFilter, includes: string[]}>
+     * @return array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}>
      */
     private function getExtensionsToLoad(): array
     {
@@ -137,7 +137,7 @@ class ServeCommand extends Command
         if ([] !== $customDirs) {
             $extensions['_custom'] = [
                 'dirs' => $customDirs,
-                'filter' => PluginFilter::all(),
+                'filter' => ExtensionFilter::all(),
                 'includes' => [],
             ];
         }
@@ -146,7 +146,7 @@ class ServeCommand extends Command
         $mateDir = substr(\dirname(__DIR__, 2).'/mate', \strlen($rootDir));
         $extensions['_local'] = [
             'dirs' => [$mateDir],
-            'filter' => PluginFilter::all(),
+            'filter' => ExtensionFilter::all(),
             'includes' => [],
         ];
 

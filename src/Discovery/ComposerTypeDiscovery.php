@@ -12,7 +12,7 @@
 namespace Symfony\AI\Mate\Discovery;
 
 use Psr\Log\LoggerInterface;
-use Symfony\AI\Mate\Model\PluginFilter;
+use Symfony\AI\Mate\Model\ExtensionFilter;
 
 /**
  * Discovers MCP extensions via extra.ai-mate config in composer.json.
@@ -47,7 +47,7 @@ final class ComposerTypeDiscovery
     /**
      * @param array<int, string> $enabledPlugins List of enabled package names
      *
-     * @return array<string, array{dirs: string[], filter: PluginFilter, includes: string[]}> Package name => dirs, filter, and include files
+     * @return array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}> Package name => dirs, filter, and include files
      */
     public function discover(array $enabledPlugins = []): array
     {
@@ -77,7 +77,7 @@ final class ComposerTypeDiscovery
                 $includeFiles = $this->extractIncludeFiles($package, $packageName);
                 $extensions[$packageName] = [
                     'dirs' => $scanDirs,
-                    'filter' => PluginFilter::all(),
+                    'filter' => ExtensionFilter::all(),
                     'includes' => $includeFiles,
                 ];
             }

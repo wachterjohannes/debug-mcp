@@ -3,9 +3,9 @@
 namespace Symfony\AI\Mate\Tests\Model;
 
 use PHPUnit\Framework\TestCase;
-use Symfony\AI\Mate\Model\PluginFilter;
+use Symfony\AI\Mate\Model\ExtensionFilter;
 
-class PluginFilterFeatureTest extends TestCase
+class ExtensionFilterFeatureTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -25,7 +25,7 @@ class PluginFilterFeatureTest extends TestCase
         mcpDisableFeature('vendor/package', 'tool.analyze');
         mcpDisableFeature('vendor/package', 'resource.config');
 
-        $filter = PluginFilter::all()->withDisabledFeatures('vendor/package');
+        $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
         $this->assertFalse($filter->allowsFeature('tool', 'analyze'));
         $this->assertFalse($filter->allowsFeature('resource', 'config'));
@@ -37,7 +37,7 @@ class PluginFilterFeatureTest extends TestCase
         // Set up global registry
         mcpDisableFeature('vendor/package', 'tool.analyze');
 
-        $filter = PluginFilter::all()->withDisabledFeatures('vendor/package');
+        $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
         $this->assertFalse($filter->allowsFeature('tool', 'analyze'));
         $this->assertTrue($filter->allowsFeature('tool', 'other'));
@@ -45,7 +45,7 @@ class PluginFilterFeatureTest extends TestCase
 
     public function testAllowsFeatureReturnsTrueWhenNoFeaturesExcluded(): void
     {
-        $filter = PluginFilter::all();
+        $filter = ExtensionFilter::all();
 
         $this->assertTrue($filter->allowsFeature('tool', 'any-tool'));
         $this->assertTrue($filter->allowsFeature('resource', 'any-resource'));
@@ -58,7 +58,7 @@ class PluginFilterFeatureTest extends TestCase
         mcpDisableFeature('vendor/package', 'tool.analyze');
         mcpDisableFeature('vendor/package', 'resource.config');
 
-        $filter = PluginFilter::all()->withDisabledFeatures('vendor/package');
+        $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
         $this->assertFalse($filter->allowsFeature('tool', 'analyze'));
         $this->assertFalse($filter->allowsFeature('resource', 'config'));
@@ -69,7 +69,7 @@ class PluginFilterFeatureTest extends TestCase
         // Set up global registry
         mcpDisableFeature('vendor/package', 'tool.analyze');
 
-        $filter = PluginFilter::all()->withDisabledFeatures('vendor/package');
+        $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
         $this->assertTrue($filter->allowsFeature('tool', 'other-tool'));
         $this->assertTrue($filter->allowsFeature('resource', 'any-resource'));
@@ -81,7 +81,7 @@ class PluginFilterFeatureTest extends TestCase
         mcpDisableFeature('vendor/package', 'tool.analyze');
         mcpDisableFeature('vendor/package', 'resource.config');
 
-        $originalFilter = PluginFilter::all();
+        $originalFilter = ExtensionFilter::all();
         $newFilter = $originalFilter->withDisabledFeatures('vendor/package');
 
         // Original filter should be unchanged
@@ -95,7 +95,7 @@ class PluginFilterFeatureTest extends TestCase
 
     public function testWithDisabledFeaturesReturnsSameFilterWhenNoDisabledFeatures(): void
     {
-        $filter = PluginFilter::all();
+        $filter = ExtensionFilter::all();
         $newFilter = $filter->withDisabledFeatures('vendor/unknown');
 
         $this->assertSame($filter, $newFilter);
@@ -108,7 +108,7 @@ class PluginFilterFeatureTest extends TestCase
         mcpDisableFeature('vendor/package', 'tool.tool2');
         mcpDisableFeature('vendor/package', 'resource.resource1');
 
-        $filter = PluginFilter::all()->withDisabledFeatures('vendor/package');
+        $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
         // All disabled features should be filtered
         $this->assertFalse($filter->allowsFeature('tool', 'tool1'));
@@ -117,20 +117,4 @@ class PluginFilterFeatureTest extends TestCase
         $this->assertTrue($filter->allowsFeature('tool', 'other-tool'));
     }
 
-    public function testClassFilteringAlwaysReturnsTrue(): void
-    {
-        // Set up global registry
-        mcpDisableFeature('vendor/package', 'tool.my-tool');
-
-        $filter = PluginFilter::all()->withDisabledFeatures('vendor/package');
-
-        // Class filtering has been removed - all classes are allowed
-        $this->assertTrue($filter->allows('SomeClass'));
-        $this->assertTrue($filter->allows('OtherClass'));
-        $this->assertTrue($filter->allows('AnyClass'));
-
-        // Feature filtering should still work
-        $this->assertFalse($filter->allowsFeature('tool', 'my-tool'));
-        $this->assertTrue($filter->allowsFeature('tool', 'other-tool'));
-    }
 }

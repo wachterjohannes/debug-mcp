@@ -88,7 +88,7 @@ final class ContainerFactory
     }
 
     /**
-     * @param array<string, array{dirs: string[], filter: \Symfony\AI\Mate\Model\PluginFilter, includes: string[]}> $extensions
+     * @param array<string, array{dirs: string[], filter: \Symfony\AI\Mate\Model\ExtensionFilter, includes: string[]}> $extensions
      */
     private function loadExtensionServices(ContainerBuilder $container, array $extensions): void
     {
