@@ -62,7 +62,7 @@ If the server doesn't start, check:
 ### Tools not appearing
 
 If AI tools don't see your MCP features:
-1. Check that plugins are enabled in `.mcp.php`
+1. Check that extensions are enabled in `.mate/extensions.php`
 2. Run discovery: `vendor/bin/mate discover`
 3. Restart your AI assistant
 4. Check logs for errors

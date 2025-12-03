@@ -125,7 +125,7 @@ vendor/bin/mate clear-cache
 
 ## Security
 
-For security, no vendor plugins are enabled by default. You must explicitly whitelist packages in the `enabled_plugins`
-configuration.
+For security, no vendor extensions are enabled by default. You must explicitly enable packages in `.mate/extensions.php`
+by setting their `enabled` flag to `true`.
 
 Local `mate/` directory is always enabled for rapid development.

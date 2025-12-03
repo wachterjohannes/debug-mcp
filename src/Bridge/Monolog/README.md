@@ -117,18 +117,17 @@ $configurator->parameters()
 
 ## Installation
 
-The bridge is automatically discovered when installed as a Composer package with type `ai-mate-extension`.
+The bridge is automatically discovered when installed as a Composer package with `extra.ai-mate` configuration.
 
 ```bash
 composer require symfony/ai-mate-monolog
+vendor/bin/mate discover
 ```
 
-Then enable it in your `.mcp.php` configuration:
+The `discover` command will automatically add it to `.mate/extensions.php`:
 
 ```php
 return [
-    'enabled_plugins' => [
-        'symfony/ai-mate-monolog',
-    ],
+    'symfony/ai-mate-monolog' => ['enabled' => true],
 ];
 ```
