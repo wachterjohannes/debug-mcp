@@ -46,6 +46,7 @@ final class FilteredDiscoveryLoader implements LoaderInterface
      */
     public function registerServices(): void
     {
+        /** @var array{dirs: string[], filter: PluginFilter} $data */
         foreach ($this->extensions as $packageName => $data) {
             $scanDirs = $data['dirs'];
             $filter = $data['filter'];
@@ -77,6 +78,7 @@ final class FilteredDiscoveryLoader implements LoaderInterface
         $allPrompts = [];
         $allResourceTemplates = [];
 
+        /** @var array{dirs: string[], filter: PluginFilter} $data */
         foreach ($this->extensions as $packageName => $data) {
             $scanDirs = $data['dirs'];
             $filter = $data['filter']->withDisabledFeatures($packageName);

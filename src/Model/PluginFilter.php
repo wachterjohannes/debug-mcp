@@ -14,13 +14,9 @@ namespace Symfony\AI\Mate\Model;
 final class PluginFilter
 {
     /**
-     * @param string[] $exclude
-     * @param string[] $includeOnly
      * @param string[] $excludeFeatures Feature names to exclude (e.g., 'tool.analyze', 'resource.config')
      */
     private function __construct(
-        public readonly array $exclude = [],
-        public readonly array $includeOnly = [],
         public readonly array $excludeFeatures = [],
     ) {
     }
@@ -34,54 +30,17 @@ final class PluginFilter
     }
 
     /**
-     * Create filter that excludes specific classes.
+     * Check if a class is allowed.
      *
-     * @param string|string[] $classes
-     */
-    public static function exclude(string|array $classes): self
-    {
-        return new self(exclude: (array) $classes);
-    }
-
-    /**
-     * Create filter that only includes specific classes.
+     * Note: Class-level filtering has been removed. This method now always returns true.
+     * It's kept for backward compatibility and will be removed in a future version.
      *
-     * @param string|string[] $classes
+     * @deprecated Class-level filtering is no longer supported. Use feature-level filtering instead.
      */
-    public static function includeOnly(string|array $classes): self
-    {
-        return new self(includeOnly: (array) $classes);
-    }
-
     public function allows(string $className): bool
     {
-        // If include_only is set, only allow those classes
-        if ([] !== $this->includeOnly) {
-            return \in_array($className, $this->includeOnly, true);
-        }
-
-        // If exclude is set, reject excluded classes
-        if ([] !== $this->exclude) {
-            return !\in_array($className, $this->exclude, true);
-        }
-
-        // No filters, allow everything
+        // Class-level filtering removed - all classes are allowed
         return true;
-    }
-
-    public function hasFilters(): bool
-    {
-        return [] !== $this->exclude || [] !== $this->includeOnly;
-    }
-
-    /**
-     * Create filter that excludes specific features.
-     *
-     * @param string|string[] $features Feature names to exclude (e.g., 'tool.analyze', 'resource.config')
-     */
-    public static function excludeFeatures(string|array $features): self
-    {
-        return new self(excludeFeatures: (array) $features);
     }
 
     /**
@@ -114,8 +73,6 @@ final class PluginFilter
         }
 
         return new self(
-            $this->exclude,
-            $this->includeOnly,
             array_merge($this->excludeFeatures, $disabledFeatures),
         );
     }
