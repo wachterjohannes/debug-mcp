@@ -37,7 +37,7 @@ function mcpLoadEnv(string $filename): void
 {
     // Get the root directory from environment variable set in bin/mate.php
     $rootDir = $_ENV['MATE_ROOT_DIR'] ?? '';
-    if ('' === $rootDir || !\is_string($rootDir)) {
+    if ('' === $rootDir || !is_string($rootDir)) {
         throw new RuntimeException('MATE_ROOT_DIR environment variable is not set. This function must be called after bootstrap.');
     }
 

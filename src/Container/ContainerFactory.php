@@ -38,19 +38,19 @@ final class ContainerFactory
         $loader->load('default.services.php');
 
         // 2. Read enabled extensions from .mate/extensions.php
-        $enabledPlugins = $this->getEnabledExtensions();
+        $enabledExtensions = $this->getEnabledExtensions();
 
         // 3. Set base parameters
-        $container->setParameter('mate.enabled_plugins', $enabledPlugins);
+        $container->setParameter('mate.enabled_extensions', $enabledExtensions);
         $container->setParameter('mate.root_dir', $this->rootDir);
 
         // 4. Discover extensions and load their services
-        if ([] !== $enabledPlugins) {
+        if ([] !== $enabledExtensions) {
             $logger = $container->get(LoggerInterface::class);
             \assert($logger instanceof LoggerInterface);
 
             $discovery = new ComposerTypeDiscovery($this->rootDir, $logger);
-            $extensions = $discovery->discover($enabledPlugins);
+            $extensions = $discovery->discover($enabledExtensions);
 
             if ([] !== $extensions) {
                 $this->loadExtensionServices($container, $extensions);
@@ -79,14 +79,14 @@ final class ContainerFactory
             return [];
         }
 
-        $enabledPlugins = [];
+        $enabledExtensions = [];
         foreach ($extensionsConfig as $packageName => $config) {
             if (\is_string($packageName) && \is_array($config) && ($config['enabled'] ?? false)) {
-                $enabledPlugins[] = $packageName;
+                $enabledExtensions[] = $packageName;
             }
         }
 
-        return $enabledPlugins;
+        return $enabledExtensions;
     }
 
     /**

@@ -110,16 +110,16 @@ class ServeCommand extends Command
         $rootDir = $this->container->getParameter('mate.root_dir');
         \assert(\is_string($rootDir));
 
-        $enabledPlugins = $this->container->getParameter('mate.enabled_plugins');
-        \assert(\is_array($enabledPlugins));
-        /** @var array<int, string> $enabledPlugins */
+        $enabledExtensions = $this->container->getParameter('mate.enabled_extensions');
+        \assert(\is_array($enabledExtensions));
+        /** @var array<int, string> $enabledExtensions */
         $scanDirs = $this->container->getParameter('mate.scan_dirs');
         \assert(\is_array($scanDirs));
 
         $extensions = [];
 
         // 1. Discover Composer-based extensions (with whitelist and filters)
-        foreach ($this->discovery->discover($enabledPlugins) as $packageName => $data) {
+        foreach ($this->discovery->discover($enabledExtensions) as $packageName => $data) {
             $extensions[$packageName] = $data;
         }
 

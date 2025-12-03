@@ -78,11 +78,11 @@ class ComposerTypeDiscoveryTest extends TestCase
             new NullLogger()
         );
 
-        $enabledPlugins = [
+        $enabledExtensions = [
             'vendor/package-a',
         ];
 
-        $extensions = $discovery->discover($enabledPlugins);
+        $extensions = $discovery->discover($enabledExtensions);
 
         $this->assertCount(1, $extensions);
         $this->assertArrayHasKey('vendor/package-a', $extensions);
@@ -96,12 +96,12 @@ class ComposerTypeDiscoveryTest extends TestCase
             new NullLogger()
         );
 
-        $enabledPlugins = [
+        $enabledExtensions = [
             'vendor/package-a',
             'vendor/package-b',
         ];
 
-        $extensions = $discovery->discover($enabledPlugins);
+        $extensions = $discovery->discover($enabledExtensions);
 
         $this->assertCount(2, $extensions);
         $this->assertArrayHasKey('vendor/package-a', $extensions);
