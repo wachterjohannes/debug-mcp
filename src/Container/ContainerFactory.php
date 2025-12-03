@@ -24,34 +24,86 @@ use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
 final class ContainerFactory
 {
     public function __construct(
-        private LoggerInterface $logger,
+        private string $rootDir,
     ) {
     }
 
-    /**
-     * Create a ContainerBuilder with extension configurations loaded.
-     *
-     * @param array<string, array{dirs: string[], filter: \Symfony\AI\Mate\Model\PluginFilter, includes: string[]}> $extensions
-     */
-    public function create(array $extensions): ContainerBuilder
+    public function create(): ContainerBuilder
     {
+        // 1. Build base container with default services
         $container = new ContainerBuilder();
+        $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__)));
+        $loader->load('default.services.php');
 
-        // Register core services
-        $container->set(LoggerInterface::class, $this->logger);
+        // 2. Read enabled extensions from .mate/extensions.php
+        $enabledPlugins = $this->getEnabledExtensions();
 
-        // Load extension include files
-        foreach ($extensions as $packageName => $data) {
-            $this->loadExtensionIncludes($container, $packageName, $data['includes']);
+        // 3. Set base parameters
+        $container->setParameter('mate.enabled_plugins', $enabledPlugins);
+        $container->setParameter('mate.root_dir', $this->rootDir);
+
+        // 4. Discover extensions and load their services
+        if ([] !== $enabledPlugins) {
+            $logger = $container->get(LoggerInterface::class);
+            \assert($logger instanceof LoggerInterface);
+
+            $discovery = new \Symfony\AI\Mate\Discovery\ComposerTypeDiscovery($this->rootDir, $logger);
+            $extensions = $discovery->discover($enabledPlugins);
+
+            if ([] !== $extensions) {
+                $this->loadExtensionServices($container, $extensions);
+            }
         }
+
+        // 5. Load user services last (so they can override extension configs and access parameters)
+        $this->loadUserServices($container);
 
         return $container;
     }
 
     /**
+     * @return array<int, string>
+     */
+    private function getEnabledExtensions(): array
+    {
+        $extensionsFile = $this->rootDir.'/.mate/extensions.php';
+
+        if (!file_exists($extensionsFile)) {
+            return [];
+        }
+
+        $extensionsConfig = include $extensionsFile;
+        if (!\is_array($extensionsConfig)) {
+            return [];
+        }
+
+        $enabledPlugins = [];
+        foreach ($extensionsConfig as $packageName => $config) {
+            if (\is_string($packageName) && \is_array($config) && ($config['enabled'] ?? false)) {
+                $enabledPlugins[] = $packageName;
+            }
+        }
+
+        return $enabledPlugins;
+    }
+
+    /**
+     * @param array<string, array{dirs: string[], filter: \Symfony\AI\Mate\Model\PluginFilter, includes: string[]}> $extensions
+     */
+    private function loadExtensionServices(ContainerBuilder $container, array $extensions): void
+    {
+        $logger = $container->get(LoggerInterface::class);
+        \assert($logger instanceof LoggerInterface);
+
+        foreach ($extensions as $packageName => $data) {
+            $this->loadExtensionIncludes($container, $logger, $packageName, $data['includes']);
+        }
+    }
+
+    /**
      * @param string[] $includeFiles
      */
-    private function loadExtensionIncludes(ContainerBuilder $container, string $packageName, array $includeFiles): void
+    private function loadExtensionIncludes(ContainerBuilder $container, LoggerInterface $logger, string $packageName, array $includeFiles): void
     {
         foreach ($includeFiles as $includeFile) {
             if (!file_exists($includeFile)) {
@@ -62,17 +114,42 @@ final class ContainerFactory
                 $loader = new PhpFileLoader($container, new FileLocator(\dirname($includeFile)));
                 $loader->load(basename($includeFile));
 
-                $this->logger->debug('Loaded extension include', [
+                $logger->debug('Loaded extension include', [
                     'package' => $packageName,
                     'file' => $includeFile,
                 ]);
             } catch (\Throwable $e) {
-                $this->logger->warning('Failed to load extension include', [
+                $logger->warning('Failed to load extension include', [
                     'package' => $packageName,
                     'file' => $includeFile,
                     'error' => $e->getMessage(),
                 ]);
             }
+        }
+    }
+
+    private function loadUserServices(ContainerBuilder $container): void
+    {
+        $userServicesFile = $this->rootDir.'/.mate/services.php';
+        if (!file_exists($userServicesFile)) {
+            return;
+        }
+
+        $logger = $container->get(LoggerInterface::class);
+        \assert($logger instanceof LoggerInterface);
+
+        try {
+            $loader = new PhpFileLoader($container, new FileLocator($this->rootDir.'/.mate'));
+            $loader->load('services.php');
+
+            $logger->debug('Loaded user services', [
+                'file' => $userServicesFile,
+            ]);
+        } catch (\Throwable $e) {
+            $logger->warning('Failed to load user services', [
+                'file' => $userServicesFile,
+                'error' => $e->getMessage(),
+            ]);
         }
     }
 }

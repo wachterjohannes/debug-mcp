@@ -15,7 +15,6 @@ use Mcp\Server;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StdioTransport;
 use Psr\Log\LoggerInterface;
-use Symfony\AI\Mate\Container\ContainerFactory;
 use Symfony\AI\Mate\Container\FilteredDiscoveryLoader;
 use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
 use Symfony\AI\Mate\Model\PluginFilter;
@@ -70,29 +69,25 @@ class ServeCommand extends Command
             (new Dotenv())->load($rootDir.\DIRECTORY_SEPARATOR.$envFile, ...$extra);
         }
 
-        // 2. Build Symfony DI container with extension services
-        $containerFactory = new ContainerFactory($this->logger);
-        $container = $containerFactory->create($extensions);
-
-        // 3. Create filtered discovery loader
+        // 2. Create filtered discovery loader
         $loader = new FilteredDiscoveryLoader(
             basePath: $rootDir,
             extensions: $extensions,
             excludeDirs: [],
             logger: $this->logger,
-            container: $container,
+            container: $this->container,
         );
 
-        // 4. Pre-register discovered services in the container (before compilation)
+        // 3. Pre-register discovered services in the container (before compilation)
         $loader->registerServices();
 
-        // 5. Compile the container (resolves parameters and validates)
-        $container->compile();
+        // 4. Compile the container (resolves parameters and validates)
+        $this->container->compile();
 
-        // 6. Build and run MCP server
+        // 5. Build and run MCP server
         $server = Server::builder()
             ->setServerInfo('ai-mate', '0.1.0', 'Symfony AI development assistant MCP server')
-            ->setContainer($container)
+            ->setContainer($this->container)
             ->addLoaders($loader)
             ->setDiscovery(\dirname(__DIR__).'/Capability')
             ->setSession(new FileSessionStore($cacheDir.'/sessions'))

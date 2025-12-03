@@ -79,15 +79,25 @@ final class FilteredDiscoveryLoader implements LoaderInterface
 
         foreach ($this->extensions as $packageName => $data) {
             $scanDirs = $data['dirs'];
-            $filter = $data['filter'];
+            $filter = $data['filter']->withDisabledFeatures($packageName);
 
             $discoveryState = $this->discoverCapabilities($scanDirs);
 
             // Filter and collect tools
             foreach ($discoveryState->getTools() as $name => $tool) {
+                // Check if feature is disabled
+                if (!$filter->allowsFeature('tool', $name)) {
+                    $this->logger->debug('Excluding tool by feature filter', [
+                        'package' => $packageName,
+                        'tool' => $name,
+                    ]);
+                    continue;
+                }
+
+                // Check if class is disabled
                 $className = $this->extractClassName($tool->handler);
                 if (null !== $className && !$filter->allows($className)) {
-                    $this->logger->debug('Excluding tool by filter', [
+                    $this->logger->debug('Excluding tool by class filter', [
                         'package' => $packageName,
                         'tool' => $name,
                         'class' => $className,
@@ -100,9 +110,19 @@ final class FilteredDiscoveryLoader implements LoaderInterface
 
             // Filter and collect resources
             foreach ($discoveryState->getResources() as $uri => $resource) {
+                // Check if feature is disabled
+                if (!$filter->allowsFeature('resource', $uri)) {
+                    $this->logger->debug('Excluding resource by feature filter', [
+                        'package' => $packageName,
+                        'resource' => $uri,
+                    ]);
+                    continue;
+                }
+
+                // Check if class is disabled
                 $className = $this->extractClassName($resource->handler);
                 if (null !== $className && !$filter->allows($className)) {
-                    $this->logger->debug('Excluding resource by filter', [
+                    $this->logger->debug('Excluding resource by class filter', [
                         'package' => $packageName,
                         'resource' => $uri,
                         'class' => $className,
@@ -115,9 +135,19 @@ final class FilteredDiscoveryLoader implements LoaderInterface
 
             // Filter and collect prompts
             foreach ($discoveryState->getPrompts() as $name => $prompt) {
+                // Check if feature is disabled
+                if (!$filter->allowsFeature('prompt', $name)) {
+                    $this->logger->debug('Excluding prompt by feature filter', [
+                        'package' => $packageName,
+                        'prompt' => $name,
+                    ]);
+                    continue;
+                }
+
+                // Check if class is disabled
                 $className = $this->extractClassName($prompt->handler);
                 if (null !== $className && !$filter->allows($className)) {
-                    $this->logger->debug('Excluding prompt by filter', [
+                    $this->logger->debug('Excluding prompt by class filter', [
                         'package' => $packageName,
                         'prompt' => $name,
                         'class' => $className,
@@ -130,9 +160,13 @@ final class FilteredDiscoveryLoader implements LoaderInterface
 
             // Filter and collect resource templates
             foreach ($discoveryState->getResourceTemplates() as $uriTemplate => $template) {
+                // Note: Resource templates are not filterable by feature name,
+                // only by class name since they use URI patterns not named features
+
+                // Check if class is disabled
                 $className = $this->extractClassName($template->handler);
                 if (null !== $className && !$filter->allows($className)) {
-                    $this->logger->debug('Excluding resource template by filter', [
+                    $this->logger->debug('Excluding resource template by class filter', [
                         'package' => $packageName,
                         'template' => $uriTemplate,
                         'class' => $className,

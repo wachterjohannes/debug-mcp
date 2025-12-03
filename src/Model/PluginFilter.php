@@ -16,10 +16,12 @@ final class PluginFilter
     /**
      * @param string[] $exclude
      * @param string[] $includeOnly
+     * @param string[] $excludeFeatures Feature names to exclude (e.g., 'tool.analyze', 'resource.config')
      */
     private function __construct(
         public readonly array $exclude = [],
         public readonly array $includeOnly = [],
+        public readonly array $excludeFeatures = [],
     ) {
     }
 
@@ -70,5 +72,51 @@ final class PluginFilter
     public function hasFilters(): bool
     {
         return [] !== $this->exclude || [] !== $this->includeOnly;
+    }
+
+    /**
+     * Create filter that excludes specific features.
+     *
+     * @param string|string[] $features Feature names to exclude (e.g., 'tool.analyze', 'resource.config')
+     */
+    public static function excludeFeatures(string|array $features): self
+    {
+        return new self(excludeFeatures: (array) $features);
+    }
+
+    /**
+     * Check if a specific feature is allowed.
+     *
+     * @param string $type Feature type (tool, resource, prompt)
+     * @param string $name Feature name
+     */
+    public function allowsFeature(string $type, string $name): bool
+    {
+        if ([] === $this->excludeFeatures) {
+            return true;
+        }
+
+        $featureId = $type.'.'.$name;
+
+        return !\in_array($featureId, $this->excludeFeatures, true);
+    }
+
+    /**
+     * Merge this filter with feature exclusions from the global registry.
+     *
+     * @param string $extension Extension identifier
+     */
+    public function withDisabledFeatures(string $extension): self
+    {
+        $disabledFeatures = mcpGetDisabledFeatures($extension);
+        if ([] === $disabledFeatures) {
+            return $this;
+        }
+
+        return new self(
+            $this->exclude,
+            $this->includeOnly,
+            array_merge($this->excludeFeatures, $disabledFeatures),
+        );
     }
 }

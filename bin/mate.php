@@ -27,39 +27,15 @@ if (!$root) {
     exit(1);
 }
 
-// Set root directory as environment variable for container
-$_ENV=['MATE_ROOT_DIR'] = $root
+// Set the root directory as an environment variable using $_ENV to be thread-safe
+$_ENV['MATE_ROOT_DIR'] = $root;
 
 use Symfony\AI\Mate\App;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
-use Symfony\Component\Config\FileLocator;
+use Symfony\AI\Mate\Container\ContainerFactory;
 
-// Build container with default services
-$container = new ContainerBuilder();
-$loader = new PhpFileLoader($container, new FileLocator(dirname(__DIR__).'/src'));
-$loader->load('default.services.php');
+require_once dirname(__DIR__).'/src/Helper/functions.php';
 
-// Load user services if exists
-if (file_exists($root.'/.mate/services.php')) {
-    $userLoader = new PhpFileLoader($container, new FileLocator($root.'/.mate'));
-    $userLoader->load('services.php');
-}
-
-// Read enabled extensions
-$enabledPlugins = [];
-if (file_exists($root.'/.mate/extensions.php')) {
-    $extensionsConfig = include $root.'/.mate/extensions.php';
-    if (is_array($extensionsConfig)) {
-        foreach ($extensionsConfig as $packageName => $config) {
-            if (is_string($packageName) && is_array($config) && ($config['enabled'] ?? false)) {
-                $enabledPlugins[] = $packageName;
-            }
-        }
-    }
-}
-
-$container->setParameter('mate.enabled_plugins', $enabledPlugins);
-$container->setParameter('mate.root_dir', $root);
+$containerFactory = new ContainerFactory($root);
+$container = $containerFactory->create();
 
 App::build($container)->run();
