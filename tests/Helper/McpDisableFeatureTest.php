@@ -9,18 +9,18 @@ class McpDisableFeatureTest extends TestCase
     protected function setUp(): void
     {
         // Clear global registry before each test
-        $GLOBALS['mcp_disabled_features'] = [];
+        $GLOBALS['ai_mate_mcp_disabled_features'] = [];
     }
 
     protected function tearDown(): void
     {
         // Clean up global registry after each test
-        $GLOBALS['mcp_disabled_features'] = [];
+        $GLOBALS['ai_mate_mcp_disabled_features'] = [];
     }
 
     public function testDisablesTool(): void
     {
-        mcpDisableFeature('vendor/package', 'tool.my-tool');
+        mcpDisableFeature('vendor/package', 'tool', 'my-tool');
 
         $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
 
@@ -30,7 +30,7 @@ class McpDisableFeatureTest extends TestCase
 
     public function testDisablesResource(): void
     {
-        mcpDisableFeature('vendor/package', 'resource.my-resource');
+        mcpDisableFeature('vendor/package', 'resource', 'my-resource');
 
         $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
 
@@ -40,7 +40,7 @@ class McpDisableFeatureTest extends TestCase
 
     public function testDisablesPrompt(): void
     {
-        mcpDisableFeature('vendor/package', 'prompt.my-prompt');
+        mcpDisableFeature('vendor/package', 'prompt', 'my-prompt');
 
         $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
 
@@ -50,9 +50,9 @@ class McpDisableFeatureTest extends TestCase
 
     public function testDisablesMultipleFeaturesForSameExtension(): void
     {
-        mcpDisableFeature('vendor/package', 'tool.tool1');
-        mcpDisableFeature('vendor/package', 'tool.tool2');
-        mcpDisableFeature('vendor/package', 'resource.resource1');
+        mcpDisableFeature('vendor/package', 'tool', 'tool1');
+        mcpDisableFeature('vendor/package', 'tool', 'tool2');
+        mcpDisableFeature('vendor/package', 'resource', 'resource1');
 
         $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
 
@@ -64,8 +64,8 @@ class McpDisableFeatureTest extends TestCase
 
     public function testDisablesFeaturesForDifferentExtensions(): void
     {
-        mcpDisableFeature('vendor/package-a', 'tool.tool1');
-        mcpDisableFeature('vendor/package-b', 'tool.tool2');
+        mcpDisableFeature('vendor/package-a', 'tool', 'tool1');
+        mcpDisableFeature('vendor/package-b', 'tool', 'tool2');
 
         $disabledFeaturesA = mcpGetDisabledFeatures('vendor/package-a');
         $disabledFeaturesB = mcpGetDisabledFeatures('vendor/package-b');
@@ -84,25 +84,27 @@ class McpDisableFeatureTest extends TestCase
         $this->assertCount(0, $disabledFeatures);
     }
 
-    public function testThrowsExceptionForInvalidFeatureFormat(): void
-    {
-        $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid feature format');
-
-        mcpDisableFeature('vendor/package', 'invalid-format');
-    }
-
     public function testThrowsExceptionForInvalidFeatureType(): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Invalid feature format');
+        $this->expectExceptionMessage('Invalid feature type');
 
-        mcpDisableFeature('vendor/package', 'invalid.feature-name');
+        mcpDisableFeature('vendor/package', 'invalid', 'feature-name');
+    }
+
+    public function testAcceptsResourceTemplateType(): void
+    {
+        mcpDisableFeature('vendor/package', 'resourceTemplate', 'my-template');
+
+        $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
+
+        $this->assertCount(1, $disabledFeatures);
+        $this->assertContains('resourceTemplate.my-template', $disabledFeatures);
     }
 
     public function testAcceptsFeatureNamesWithHyphens(): void
     {
-        mcpDisableFeature('vendor/package', 'tool.my-tool-name');
+        mcpDisableFeature('vendor/package', 'tool', 'my-tool-name');
 
         $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
 
@@ -111,7 +113,7 @@ class McpDisableFeatureTest extends TestCase
 
     public function testAcceptsFeatureNamesWithUnderscores(): void
     {
-        mcpDisableFeature('vendor/package', 'tool.my_tool_name');
+        mcpDisableFeature('vendor/package', 'tool', 'my_tool_name');
 
         $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
 
@@ -120,7 +122,7 @@ class McpDisableFeatureTest extends TestCase
 
     public function testAcceptsFeatureNamesWithNumbers(): void
     {
-        mcpDisableFeature('vendor/package', 'tool.tool123');
+        mcpDisableFeature('vendor/package', 'tool', 'tool123');
 
         $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
 

@@ -46,7 +46,6 @@ final class FilteredDiscoveryLoader implements LoaderInterface
      */
     public function registerServices(): void
     {
-        /** @var array{dirs: string[], filter: ExtensionFilter} $data */
         foreach ($this->extensions as $data) {
             $discoveryState = $this->discoverCapabilities($data['dirs']);
 
@@ -117,7 +116,17 @@ final class FilteredDiscoveryLoader implements LoaderInterface
                 $allPrompts[$name] = $prompt;
             }
 
+            // Filter and collect resource templates
             foreach ($discoveryState->getResourceTemplates() as $uriTemplate => $template) {
+                // Check if feature is disabled
+                if (!$filter->allowsFeature('resourceTemplate', $uriTemplate)) {
+                    $this->logger->debug('Excluding resource template by feature filter', [
+                        'package' => $packageName,
+                        'template' => $uriTemplate,
+                    ]);
+                    continue;
+                }
+
                 $allResourceTemplates[$uriTemplate] = $template;
             }
         }

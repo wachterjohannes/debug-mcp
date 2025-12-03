@@ -12,6 +12,8 @@
 namespace Symfony\AI\Mate\Container;
 
 use Psr\Log\LoggerInterface;
+use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
+use Symfony\AI\Mate\Model\ExtensionFilter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
@@ -47,7 +49,7 @@ final class ContainerFactory
             $logger = $container->get(LoggerInterface::class);
             \assert($logger instanceof LoggerInterface);
 
-            $discovery = new \Symfony\AI\Mate\Discovery\ComposerTypeDiscovery($this->rootDir, $logger);
+            $discovery = new ComposerTypeDiscovery($this->rootDir, $logger);
             $extensions = $discovery->discover($enabledPlugins);
 
             if ([] !== $extensions) {
@@ -62,7 +64,7 @@ final class ContainerFactory
     }
 
     /**
-     * @return array<int, string>
+     * @return string[]
      */
     private function getEnabledExtensions(): array
     {
@@ -88,7 +90,7 @@ final class ContainerFactory
     }
 
     /**
-     * @param array<string, array{dirs: string[], filter: \Symfony\AI\Mate\Model\ExtensionFilter, includes: string[]}> $extensions
+     * @param array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}> $extensions
      */
     private function loadExtensionServices(ContainerBuilder $container, array $extensions): void
     {

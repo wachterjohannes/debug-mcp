@@ -10,20 +10,19 @@ class ExtensionFilterFeatureTest extends TestCase
     protected function setUp(): void
     {
         // Clear global registry before each test
-        $GLOBALS['mcp_disabled_features'] = [];
+        $GLOBALS['ai_mate_mcp_disabled_features'] = [];
     }
 
     protected function tearDown(): void
     {
         // Clean up global registry after each test
-        $GLOBALS['mcp_disabled_features'] = [];
+        $GLOBALS['ai_mate_mcp_disabled_features'] = [];
     }
 
     public function testMcpDisableFeaturesCreatesFilterWithExcludedFeatures(): void
     {
-        // Set up global registry
-        mcpDisableFeature('vendor/package', 'tool.analyze');
-        mcpDisableFeature('vendor/package', 'resource.config');
+        mcpDisableFeature('vendor/package', 'tool', 'analyze');
+        mcpDisableFeature('vendor/package', 'resource', 'config');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
@@ -34,8 +33,7 @@ class ExtensionFilterFeatureTest extends TestCase
 
     public function testMcpDisableFeatureAcceptsSingleFeature(): void
     {
-        // Set up global registry
-        mcpDisableFeature('vendor/package', 'tool.analyze');
+        mcpDisableFeature('vendor/package', 'tool', 'analyze');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
@@ -54,9 +52,8 @@ class ExtensionFilterFeatureTest extends TestCase
 
     public function testAllowsFeatureReturnsFalseForExcludedFeature(): void
     {
-        // Set up global registry
-        mcpDisableFeature('vendor/package', 'tool.analyze');
-        mcpDisableFeature('vendor/package', 'resource.config');
+        mcpDisableFeature('vendor/package', 'tool', 'analyze');
+        mcpDisableFeature('vendor/package', 'resource', 'config');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
@@ -66,8 +63,7 @@ class ExtensionFilterFeatureTest extends TestCase
 
     public function testAllowsFeatureReturnsTrueForNonExcludedFeature(): void
     {
-        // Set up global registry
-        mcpDisableFeature('vendor/package', 'tool.analyze');
+        mcpDisableFeature('vendor/package', 'tool', 'analyze');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
@@ -77,14 +73,12 @@ class ExtensionFilterFeatureTest extends TestCase
 
     public function testWithDisabledFeaturesReturnsNewFilterWithGlobalRegistry(): void
     {
-        // Set up global registry
-        mcpDisableFeature('vendor/package', 'tool.analyze');
-        mcpDisableFeature('vendor/package', 'resource.config');
+        mcpDisableFeature('vendor/package', 'tool', 'analyze');
+        mcpDisableFeature('vendor/package', 'resource', 'config');
 
         $originalFilter = ExtensionFilter::all();
         $newFilter = $originalFilter->withDisabledFeatures('vendor/package');
 
-        // Original filter should be unchanged
         $this->assertTrue($originalFilter->allowsFeature('tool', 'analyze'));
         $this->assertTrue($originalFilter->allowsFeature('resource', 'config'));
 
@@ -103,18 +97,15 @@ class ExtensionFilterFeatureTest extends TestCase
 
     public function testWithDisabledFeaturesMergesMultipleDisabledFeatures(): void
     {
-        // Set up global registry with multiple features
-        mcpDisableFeature('vendor/package', 'tool.tool1');
-        mcpDisableFeature('vendor/package', 'tool.tool2');
-        mcpDisableFeature('vendor/package', 'resource.resource1');
+        mcpDisableFeature('vendor/package', 'tool', 'tool1');
+        mcpDisableFeature('vendor/package', 'tool', 'tool2');
+        mcpDisableFeature('vendor/package', 'resource', 'resource1');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
-        // All disabled features should be filtered
         $this->assertFalse($filter->allowsFeature('tool', 'tool1'));
         $this->assertFalse($filter->allowsFeature('tool', 'tool2'));
         $this->assertFalse($filter->allowsFeature('resource', 'resource1'));
         $this->assertTrue($filter->allowsFeature('tool', 'other-tool'));
     }
-
 }

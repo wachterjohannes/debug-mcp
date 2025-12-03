@@ -12,10 +12,10 @@
 use Symfony\Component\Dotenv\Dotenv;
 
 /*
- * Initialize global registry for disabled MCP features.
+ * Initialize a global registry for disabled MCP features.
  */
-if (!isset($GLOBALS['mcp_disabled_features'])) {
-    $GLOBALS['mcp_disabled_features'] = [];
+if (!isset($GLOBALS['ai_mate_mcp_disabled_features'])) {
+    $GLOBALS['ai_mate_mcp_disabled_features'] = [];
 }
 
 /**
@@ -29,8 +29,6 @@ if (!isset($GLOBALS['mcp_disabled_features'])) {
  * mcpLoadEnv('.env'); // Loads .mate/.env
  * ```
  *
- * @param string $filename The filename relative to .mate/ directory
- *
  * @throws RuntimeException If the .mate/ directory or the specified file does not exist
  *
  * @author Johannes Wachter <johannes@sulu.io>
@@ -38,8 +36,8 @@ if (!isset($GLOBALS['mcp_disabled_features'])) {
 function mcpLoadEnv(string $filename): void
 {
     // Get the root directory from environment variable set in bin/mate.php
-    $rootDir = getenv('MATE_ROOT_DIR');
-    if (false === $rootDir || '' === $rootDir) {
+    $rootDir = $_ENV['MATE_ROOT_DIR'] ?? '';
+    if ('' === $rootDir || !\is_string($rootDir)) {
         throw new RuntimeException('MATE_ROOT_DIR environment variable is not set. This function must be called after bootstrap.');
     }
 
@@ -59,46 +57,43 @@ function mcpLoadEnv(string $filename): void
 /**
  * Disable a specific MCP feature from an extension.
  *
- * This function allows you to disable specific tools, resources, or prompts
- * from MCP extensions at a granular level. The feature is specified using
- * the format "{type}.{name}" where type is one of: tool, resource, prompt.
+ * This function allows you to disable specific tools, resources, prompts, or
+ * resource templates from MCP extensions at a granular level.
  *
  * Example usage in .mate/services.php:
  * ```php
- * mcpDisableFeature('phpstan/ai-mate-extension', 'tool.phpstan-analyze');
- * mcpDisableFeature('vendor/extension', 'resource.some-resource');
- * mcpDisableFeature('vendor/extension', 'prompt.my-prompt');
+ * mcpDisableFeature('symfony/ai-mate', 'tool', 'php-version');
+ * mcpDisableFeature('vendor/extension', 'resource', 'some-resource');
+ * mcpDisableFeature('vendor/extension', 'prompt', 'my-prompt');
+ * mcpDisableFeature('vendor/extension', 'resourceTemplate', 'template-pattern');
  * ```
  *
- * @param string $extension The extension identifier (e.g., 'vendor/package')
- * @param string $feature   The feature identifier in format "{type}.{name}"
- *
- * @throws InvalidArgumentException If the feature format is invalid
+ * @throws InvalidArgumentException If the feature type is invalid
  *
  * @author Johannes Wachter <johannes@sulu.io>
  */
-function mcpDisableFeature(string $extension, string $feature): void
+function mcpDisableFeature(string $extension, string $type, string $name): void
 {
-    // Validate feature format
-    if (!preg_match('/^(tool|resource|prompt)\.[\w\-]+$/', $feature)) {
-        throw new InvalidArgumentException(sprintf('Invalid feature format "%s". Expected format: "{type}.{name}" where type is one of: tool, resource, prompt', $feature));
+    // Validate feature type
+    $validTypes = ['tool', 'resource', 'prompt', 'resourceTemplate'];
+    if (!in_array($type, $validTypes, true)) {
+        throw new InvalidArgumentException(sprintf('Invalid feature type "%s". Expected one of: %s', $type, implode(', ', $validTypes)));
     }
 
     /** @var array<string, array<string>> $registry */
-    $registry = $GLOBALS['mcp_disabled_features'];
+    $registry = $GLOBALS['ai_mate_mcp_disabled_features'];
 
     if (!isset($registry[$extension])) {
         $registry[$extension] = [];
     }
 
-    $registry[$extension][] = $feature;
-    $GLOBALS['mcp_disabled_features'] = $registry;
+    $featureId = $type.'.'.$name;
+    $registry[$extension][] = $featureId;
+    $GLOBALS['ai_mate_mcp_disabled_features'] = $registry;
 }
 
 /**
  * Get all disabled features for an extension.
- *
- * @param string $extension The extension identifier
  *
  * @return string[] List of disabled features
  *
@@ -107,7 +102,7 @@ function mcpDisableFeature(string $extension, string $feature): void
 function mcpGetDisabledFeatures(string $extension): array
 {
     /** @var array<string, array<string>> $registry */
-    $registry = $GLOBALS['mcp_disabled_features'];
+    $registry = $GLOBALS['ai_mate_mcp_disabled_features'];
 
     return $registry[$extension] ?? [];
 }
