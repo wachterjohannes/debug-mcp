@@ -62,3 +62,11 @@ composer install
 - Use component-specific exceptions from `src/Exception/`
 - Follow Symfony coding standards with `@Symfony` PHP CS Fixer rules
 - The component is marked as experimental and subject to BC breaks
+
+## Git Commit Guidelines
+
+When creating commits:
+
+- **Never include** Claude attribution (e.g., "Generated with Claude Code", "Co-Authored-By: Claude")
+- **Never mention** testing or code quality tools in commit messages (e.g., phpstan, tests, cs-fixer)
+- Focus commit messages on **what changed** and **why**, not on the tools used to verify the changes
