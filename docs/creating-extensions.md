@@ -55,29 +55,20 @@ composer require vendor/my-extension
 php bin/mate.php discover
 ```
 
-Add to `.mate/extensions.php`:
+The `discover` command will automatically add your extension to `.mate/extensions.php`:
 
 ```php
 return [
-    'enabled_plugins' => [
-        // Include all capabilities from package
-        'vendor/my-extension',
+    'vendor/my-extension' => ['enabled' => true],
+];
+```
 
-        // Exclude specific classes
-        'vendor/other-extension' => [
-            'exclude' => 'Vendor\\Package\\ExperimentalTool',
-        ],
+To disable an extension, set `enabled` to `false`:
 
-        // Or exclude multiple classes
-        'vendor/third-extension' => [
-            'exclude' => ['Class1', 'Class2'],
-        ],
-
-        // Only include specific classes
-        'vendor/focused-extension' => [
-            'include_only' => 'Vendor\\Package\\SpecificTool',
-        ],
-    ],
+```php
+return [
+    'vendor/my-extension' => ['enabled' => true],
+    'vendor/unwanted-extension' => ['enabled' => false],
 ];
 ```
 

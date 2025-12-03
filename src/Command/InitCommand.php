@@ -11,7 +11,6 @@
 
 namespace Symfony\AI\Mate\Command;
 
-use Symfony\AI\Mate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,7 +23,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class InitCommand extends Command
 {
     public function __construct(
-        private Configuration $config,
+        private string $rootDir,
     ) {
         parent::__construct(self::getDefaultName());
     }
@@ -38,21 +37,36 @@ class InitCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $root = $this->config->rootDir;
-        $mateDir = $root.'/.mate';
-        $filePath = $mateDir.'/extensions.php';
+        $mateDir = $this->rootDir.'/.mate';
 
         if (!is_dir($mateDir)) {
             mkdir($mateDir, 0755, true);
         }
 
-        if (file_exists($filePath)) {
-            if ($io->confirm('File already exists. Overwrite? (y/n)', false)) {
-                unlink($filePath);
-                $this->addConfigFile($io, $filePath);
+        // Create extensions.php
+        $extensionsFile = $mateDir.'/extensions.php';
+        if (file_exists($extensionsFile)) {
+            if ($io->confirm('extensions.php already exists. Overwrite? (y/n)', false)) {
+                unlink($extensionsFile);
+                $this->copyTemplate('extensions.php', $extensionsFile);
+                $io->success(\sprintf('Wrote %s', $extensionsFile));
             }
         } else {
-            $this->addConfigFile($io, $filePath);
+            $this->copyTemplate('extensions.php', $extensionsFile);
+            $io->success(\sprintf('Wrote %s', $extensionsFile));
+        }
+
+        // Create services.php
+        $servicesFile = $mateDir.'/services.php';
+        if (file_exists($servicesFile)) {
+            if ($io->confirm('services.php already exists. Overwrite? (y/n)', false)) {
+                unlink($servicesFile);
+                $this->copyTemplate('services.php', $servicesFile);
+                $io->success(\sprintf('Wrote %s', $servicesFile));
+            }
+        } else {
+            $this->copyTemplate('services.php', $servicesFile);
+            $io->success(\sprintf('Wrote %s', $servicesFile));
         }
 
         $io->note('Please run "vendor/bin/mate discover" to find MCP features in your vendors folder');
@@ -60,9 +74,8 @@ class InitCommand extends Command
         return Command::SUCCESS;
     }
 
-    private function addConfigFile(SymfonyStyle $io, string $filePath): void
+    private function copyTemplate(string $template, string $destination): void
     {
-        copy(__DIR__.'/../../resources/extensions.php', $filePath);
-        $io->success(\sprintf('Wrote config file to "%s"', $filePath));
+        copy(__DIR__.'/../../resources/'.$template, $destination);
     }
 }

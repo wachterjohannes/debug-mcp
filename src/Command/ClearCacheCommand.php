@@ -11,7 +11,6 @@
 
 namespace Symfony\AI\Mate\Command;
 
-use Symfony\AI\Mate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -24,7 +23,7 @@ use Symfony\Component\Finder\Finder;
 class ClearCacheCommand extends Command
 {
     public function __construct(
-        private Configuration $config,
+        private string $cacheDir,
     ) {
         parent::__construct(self::getDefaultName());
     }
@@ -38,7 +37,7 @@ class ClearCacheCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $cacheDir = $this->config->cacheDir;
+        $cacheDir = $this->cacheDir;
 
         if (!is_dir($cacheDir)) {
             $io->success('Cache directory does not exist. Nothing to clear.');

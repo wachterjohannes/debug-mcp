@@ -13,7 +13,6 @@ namespace Symfony\AI\Mate\Command;
 
 use Psr\Log\LoggerInterface;
 use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
-use Symfony\AI\Mate\Model\Configuration;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -22,13 +21,13 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 /**
  * Discover MCP extensions installed via Composer.
  *
- * Scans for packages with type "ai-mate-extension"
- * and suggests adding them to the enabledPlugins configuration.
+ * Scans for packages with extra.ai-mate configuration
+ * and generates/updates .mate/extensions.php with discovered extensions.
  */
 class DiscoverCommand extends Command
 {
     public function __construct(
-        private Configuration $config,
+        private string $rootDir,
         private LoggerInterface $logger,
     ) {
         parent::__construct(self::getDefaultName());
@@ -43,14 +42,14 @@ class DiscoverCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $discovery = new ComposerTypeDiscovery($this->config->rootDir, $this->logger);
+        $discovery = new ComposerTypeDiscovery($this->rootDir, $this->logger);
 
         // Discover all extensions, regardless of whitelist
         $extensions = $discovery->discover([]);
 
         $count = \count($extensions);
         if (0 === $count) {
-            $io->warning('No MCP extensions found. Packages must have type "ai-mate-extension" in composer.json.');
+            $io->warning('No MCP extensions found. Packages must have "extra.ai-mate" config in composer.json.');
 
             return Command::SUCCESS;
         }
@@ -66,24 +65,65 @@ class DiscoverCommand extends Command
             }
         }
 
+        // Load existing extensions.php if it exists
+        $extensionsFile = $this->rootDir.'/.mate/extensions.php';
+        $existingExtensions = [];
+        if (file_exists($extensionsFile)) {
+            $existingExtensions = include $extensionsFile;
+            if (!\is_array($existingExtensions)) {
+                $existingExtensions = [];
+            }
+        }
+
+        // Merge discovered extensions with existing config
+        $finalExtensions = [];
+        foreach ($extensions as $packageName => $data) {
+            // Preserve existing enabled state, default to true for new packages
+            $enabled = true;
+            if (isset($existingExtensions[$packageName]) && \is_array($existingExtensions[$packageName])) {
+                $enabled = $existingExtensions[$packageName]['enabled'] ?? true;
+                if (!\is_bool($enabled)) {
+                    $enabled = true;
+                }
+            }
+
+            $finalExtensions[$packageName] = [
+                'enabled' => $enabled,
+            ];
+        }
+
+        // Write to .mate/extensions.php
+        $this->writeExtensionsFile($extensionsFile, $finalExtensions);
+
         $io->writeln('');
-        $io->section('Configuration');
-        $io->writeln('Add these packages to your .mcp.php config file:');
-        $io->writeln('');
-
-        $content = implode("',\n        '", array_keys($extensions));
-
-        $io->writeln('// .mcp.php');
-        $io->writeln(<<<PHP
-return [
-    // ...
-    'enabled_plugins' => [
-        '$content',
-    ],
-];
-
-PHP);
+        $io->success(\sprintf('Updated %s', $extensionsFile));
+        $io->note('Edit this file to enable/disable specific extensions.');
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * @param array<string, array{enabled: bool}> $extensions
+     */
+    private function writeExtensionsFile(string $filePath, array $extensions): void
+    {
+        $dir = \dirname($filePath);
+        if (!is_dir($dir)) {
+            mkdir($dir, 0755, true);
+        }
+
+        $content = "<?php\n\n";
+        $content .= "// This file is managed by 'mate discover'\n";
+        $content .= "// You can manually edit to enable/disable extensions\n\n";
+        $content .= "return [\n";
+
+        foreach ($extensions as $packageName => $config) {
+            $enabled = $config['enabled'] ? 'true' : 'false';
+            $content .= "    '$packageName' => ['enabled' => $enabled],\n";
+        }
+
+        $content .= "];\n";
+
+        file_put_contents($filePath, $content);
     }
 }

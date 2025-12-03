@@ -79,7 +79,7 @@ class ComposerTypeDiscoveryTest extends TestCase
         );
 
         $enabledPlugins = [
-            'vendor/package-a' => PluginFilter::all(),
+            'vendor/package-a',
         ];
 
         $extensions = $discovery->discover($enabledPlugins);
@@ -89,7 +89,7 @@ class ComposerTypeDiscoveryTest extends TestCase
         $this->assertArrayNotHasKey('vendor/package-b', $extensions);
     }
 
-    public function testWhitelistWithExcludeFilter(): void
+    public function testWhitelistWithMultiplePackages(): void
     {
         $discovery = new ComposerTypeDiscovery(
             $this->fixturesDir.'/with-ai-mate-config',
@@ -97,12 +97,15 @@ class ComposerTypeDiscoveryTest extends TestCase
         );
 
         $enabledPlugins = [
-            'vendor/package-a' => PluginFilter::exclude('SomeClass'),
+            'vendor/package-a',
+            'vendor/package-b',
         ];
 
         $extensions = $discovery->discover($enabledPlugins);
 
-        $this->assertCount(1, $extensions);
+        $this->assertCount(2, $extensions);
+        $this->assertArrayHasKey('vendor/package-a', $extensions);
+        $this->assertArrayHasKey('vendor/package-b', $extensions);
         $this->assertInstanceOf(PluginFilter::class, $extensions['vendor/package-a']['filter']);
     }
 

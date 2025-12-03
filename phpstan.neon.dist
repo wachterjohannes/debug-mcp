@@ -2,7 +2,7 @@ parameters:
     level: max
     paths:
         - src
-        - mcp
+        - tests
     excludePaths:
         analyseAndScan:
             - src/Bridge/Monolog/vendor (?)

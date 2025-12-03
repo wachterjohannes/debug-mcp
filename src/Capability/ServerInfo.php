@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\AI\Mate\Mcp\Tools;
+namespace Symfony\AI\Mate\Capability;
 
 use Mcp\Capability\Attribute\McpTool;
 

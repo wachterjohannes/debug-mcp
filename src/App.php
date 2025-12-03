@@ -11,26 +11,34 @@
 
 namespace Symfony\AI\Mate;
 
+use Psr\Log\LoggerInterface;
 use Symfony\AI\Mate\Command\ClearCacheCommand;
 use Symfony\AI\Mate\Command\DiscoverCommand;
 use Symfony\AI\Mate\Command\InitCommand;
 use Symfony\AI\Mate\Command\ServeCommand;
-use Symfony\AI\Mate\Model\Configuration;
-use Symfony\AI\Mate\Service\Logger;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 final class App
 {
-    public static function build(Configuration $config): Application
+    public static function build(ContainerBuilder $container): Application
     {
-        $logger = new Logger();
+        $logger = $container->get(LoggerInterface::class);
+        \assert($logger instanceof LoggerInterface);
+
+        $rootDir = $container->getParameter('mate.root_dir');
+        \assert(\is_string($rootDir));
+
+        $cacheDir = $container->getParameter('mate.cache_dir');
+        \assert(\is_string($cacheDir));
+
         $application = new Application('Symfony AI Mate', '0.1.0');
 
-        self::addCommand($application, new InitCommand($config));
-        self::addCommand($application, new ServeCommand($logger, $config));
-        self::addCommand($application, new DiscoverCommand($config, $logger));
-        self::addCommand($application, new ClearCacheCommand($config));
+        self::addCommand($application, new InitCommand($rootDir));
+        self::addCommand($application, new ServeCommand($logger, $container));
+        self::addCommand($application, new DiscoverCommand($rootDir, $logger));
+        self::addCommand($application, new ClearCacheCommand($cacheDir));
 
         return $application;
     }
