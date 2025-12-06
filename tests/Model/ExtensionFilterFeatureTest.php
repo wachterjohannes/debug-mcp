@@ -19,10 +19,10 @@ class ExtensionFilterFeatureTest extends TestCase
         $GLOBALS['ai_mate_mcp_disabled_features'] = [];
     }
 
-    public function testMcpDisableFeaturesCreatesFilterWithExcludedFeatures(): void
+    public function testmateDisableFeaturesCreatesFilterWithExcludedFeatures(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'analyze');
-        mcpDisableFeature('vendor/package', 'resource', 'config');
+        mateDisableFeature('vendor/package', 'tool', 'analyze');
+        mateDisableFeature('vendor/package', 'resource', 'config');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
@@ -31,9 +31,9 @@ class ExtensionFilterFeatureTest extends TestCase
         $this->assertTrue($filter->allowsFeature('tool', 'other'));
     }
 
-    public function testMcpDisableFeatureAcceptsSingleFeature(): void
+    public function testmateDisableFeatureAcceptsSingleFeature(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'analyze');
+        mateDisableFeature('vendor/package', 'tool', 'analyze');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
@@ -52,8 +52,8 @@ class ExtensionFilterFeatureTest extends TestCase
 
     public function testAllowsFeatureReturnsFalseForExcludedFeature(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'analyze');
-        mcpDisableFeature('vendor/package', 'resource', 'config');
+        mateDisableFeature('vendor/package', 'tool', 'analyze');
+        mateDisableFeature('vendor/package', 'resource', 'config');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
@@ -63,7 +63,7 @@ class ExtensionFilterFeatureTest extends TestCase
 
     public function testAllowsFeatureReturnsTrueForNonExcludedFeature(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'analyze');
+        mateDisableFeature('vendor/package', 'tool', 'analyze');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 
@@ -73,8 +73,8 @@ class ExtensionFilterFeatureTest extends TestCase
 
     public function testWithDisabledFeaturesReturnsNewFilterWithGlobalRegistry(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'analyze');
-        mcpDisableFeature('vendor/package', 'resource', 'config');
+        mateDisableFeature('vendor/package', 'tool', 'analyze');
+        mateDisableFeature('vendor/package', 'resource', 'config');
 
         $originalFilter = ExtensionFilter::all();
         $newFilter = $originalFilter->withDisabledFeatures('vendor/package');
@@ -97,9 +97,9 @@ class ExtensionFilterFeatureTest extends TestCase
 
     public function testWithDisabledFeaturesMergesMultipleDisabledFeatures(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'tool1');
-        mcpDisableFeature('vendor/package', 'tool', 'tool2');
-        mcpDisableFeature('vendor/package', 'resource', 'resource1');
+        mateDisableFeature('vendor/package', 'tool', 'tool1');
+        mateDisableFeature('vendor/package', 'tool', 'tool2');
+        mateDisableFeature('vendor/package', 'resource', 'resource1');
 
         $filter = ExtensionFilter::all()->withDisabledFeatures('vendor/package');
 

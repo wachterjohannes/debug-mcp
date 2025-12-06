@@ -26,14 +26,14 @@ if (!isset($GLOBALS['ai_mate_mcp_disabled_features'])) {
  *
  * Example usage in .mate/services.php:
  * ```php
- * mcpLoadEnv('.env'); // Loads .mate/.env
+ * mateLoadEnv('.env'); // Loads .mate/.env
  * ```
  *
  * @throws RuntimeException If the .mate/ directory or the specified file does not exist
  *
  * @author Johannes Wachter <johannes@sulu.io>
  */
-function mcpLoadEnv(string $filename): void
+function mateLoadEnv(string $filename): void
 {
     // Get the root directory from environment variable set in bin/mate.php
     $rootDir = $_ENV['MATE_ROOT_DIR'] ?? '';
@@ -62,17 +62,17 @@ function mcpLoadEnv(string $filename): void
  *
  * Example usage in .mate/services.php:
  * ```php
- * mcpDisableFeature('symfony/ai-mate', 'tool', 'php-version');
- * mcpDisableFeature('vendor/extension', 'resource', 'some-resource');
- * mcpDisableFeature('vendor/extension', 'prompt', 'my-prompt');
- * mcpDisableFeature('vendor/extension', 'resourceTemplate', 'template-pattern');
+ * mateDisableFeature('symfony/ai-mate', 'tool', 'php-version');
+ * mateDisableFeature('vendor/extension', 'resource', 'some-resource');
+ * mateDisableFeature('vendor/extension', 'prompt', 'my-prompt');
+ * mateDisableFeature('vendor/extension', 'resourceTemplate', 'template-pattern');
  * ```
  *
  * @throws InvalidArgumentException If the feature type is invalid
  *
  * @author Johannes Wachter <johannes@sulu.io>
  */
-function mcpDisableFeature(string $extension, string $type, string $name): void
+function mateDisableFeature(string $extension, string $type, string $name): void
 {
     // Validate feature type
     $validTypes = ['tool', 'resource', 'prompt', 'resourceTemplate'];
@@ -99,7 +99,7 @@ function mcpDisableFeature(string $extension, string $type, string $name): void
  *
  * @internal
  */
-function mcpGetDisabledFeatures(string $extension): array
+function mateGetDisabledFeatures(string $extension): array
 {
     /** @var array<string, array<string>> $registry */
     $registry = $GLOBALS['ai_mate_mcp_disabled_features'];

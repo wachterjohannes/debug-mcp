@@ -4,7 +4,7 @@ namespace Symfony\AI\Mate\Tests\Helper;
 
 use PHPUnit\Framework\TestCase;
 
-class McpDisableFeatureTest extends TestCase
+class MateDisableFeatureTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -20,9 +20,9 @@ class McpDisableFeatureTest extends TestCase
 
     public function testDisablesTool(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'my-tool');
+        mateDisableFeature('vendor/package', 'tool', 'my-tool');
 
-        $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
+        $disabledFeatures = mateGetDisabledFeatures('vendor/package');
 
         $this->assertCount(1, $disabledFeatures);
         $this->assertContains('tool.my-tool', $disabledFeatures);
@@ -30,9 +30,9 @@ class McpDisableFeatureTest extends TestCase
 
     public function testDisablesResource(): void
     {
-        mcpDisableFeature('vendor/package', 'resource', 'my-resource');
+        mateDisableFeature('vendor/package', 'resource', 'my-resource');
 
-        $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
+        $disabledFeatures = mateGetDisabledFeatures('vendor/package');
 
         $this->assertCount(1, $disabledFeatures);
         $this->assertContains('resource.my-resource', $disabledFeatures);
@@ -40,9 +40,9 @@ class McpDisableFeatureTest extends TestCase
 
     public function testDisablesPrompt(): void
     {
-        mcpDisableFeature('vendor/package', 'prompt', 'my-prompt');
+        mateDisableFeature('vendor/package', 'prompt', 'my-prompt');
 
-        $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
+        $disabledFeatures = mateGetDisabledFeatures('vendor/package');
 
         $this->assertCount(1, $disabledFeatures);
         $this->assertContains('prompt.my-prompt', $disabledFeatures);
@@ -50,11 +50,11 @@ class McpDisableFeatureTest extends TestCase
 
     public function testDisablesMultipleFeaturesForSameExtension(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'tool1');
-        mcpDisableFeature('vendor/package', 'tool', 'tool2');
-        mcpDisableFeature('vendor/package', 'resource', 'resource1');
+        mateDisableFeature('vendor/package', 'tool', 'tool1');
+        mateDisableFeature('vendor/package', 'tool', 'tool2');
+        mateDisableFeature('vendor/package', 'resource', 'resource1');
 
-        $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
+        $disabledFeatures = mateGetDisabledFeatures('vendor/package');
 
         $this->assertCount(3, $disabledFeatures);
         $this->assertContains('tool.tool1', $disabledFeatures);
@@ -64,11 +64,11 @@ class McpDisableFeatureTest extends TestCase
 
     public function testDisablesFeaturesForDifferentExtensions(): void
     {
-        mcpDisableFeature('vendor/package-a', 'tool', 'tool1');
-        mcpDisableFeature('vendor/package-b', 'tool', 'tool2');
+        mateDisableFeature('vendor/package-a', 'tool', 'tool1');
+        mateDisableFeature('vendor/package-b', 'tool', 'tool2');
 
-        $disabledFeaturesA = mcpGetDisabledFeatures('vendor/package-a');
-        $disabledFeaturesB = mcpGetDisabledFeatures('vendor/package-b');
+        $disabledFeaturesA = mateGetDisabledFeatures('vendor/package-a');
+        $disabledFeaturesB = mateGetDisabledFeatures('vendor/package-b');
 
         $this->assertCount(1, $disabledFeaturesA);
         $this->assertContains('tool.tool1', $disabledFeaturesA);
@@ -79,7 +79,7 @@ class McpDisableFeatureTest extends TestCase
 
     public function testReturnsEmptyArrayForExtensionWithNoDisabledFeatures(): void
     {
-        $disabledFeatures = mcpGetDisabledFeatures('vendor/unknown');
+        $disabledFeatures = mateGetDisabledFeatures('vendor/unknown');
 
         $this->assertCount(0, $disabledFeatures);
     }
@@ -89,14 +89,14 @@ class McpDisableFeatureTest extends TestCase
         $this->expectException(\InvalidArgumentException::class);
         $this->expectExceptionMessage('Invalid feature type');
 
-        mcpDisableFeature('vendor/package', 'invalid', 'feature-name');
+        mateDisableFeature('vendor/package', 'invalid', 'feature-name');
     }
 
     public function testAcceptsResourceTemplateType(): void
     {
-        mcpDisableFeature('vendor/package', 'resourceTemplate', 'my-template');
+        mateDisableFeature('vendor/package', 'resourceTemplate', 'my-template');
 
-        $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
+        $disabledFeatures = mateGetDisabledFeatures('vendor/package');
 
         $this->assertCount(1, $disabledFeatures);
         $this->assertContains('resourceTemplate.my-template', $disabledFeatures);
@@ -104,27 +104,27 @@ class McpDisableFeatureTest extends TestCase
 
     public function testAcceptsFeatureNamesWithHyphens(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'my-tool-name');
+        mateDisableFeature('vendor/package', 'tool', 'my-tool-name');
 
-        $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
+        $disabledFeatures = mateGetDisabledFeatures('vendor/package');
 
         $this->assertContains('tool.my-tool-name', $disabledFeatures);
     }
 
     public function testAcceptsFeatureNamesWithUnderscores(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'my_tool_name');
+        mateDisableFeature('vendor/package', 'tool', 'my_tool_name');
 
-        $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
+        $disabledFeatures = mateGetDisabledFeatures('vendor/package');
 
         $this->assertContains('tool.my_tool_name', $disabledFeatures);
     }
 
     public function testAcceptsFeatureNamesWithNumbers(): void
     {
-        mcpDisableFeature('vendor/package', 'tool', 'tool123');
+        mateDisableFeature('vendor/package', 'tool', 'tool123');
 
-        $disabledFeatures = mcpGetDisabledFeatures('vendor/package');
+        $disabledFeatures = mateGetDisabledFeatures('vendor/package');
 
         $this->assertContains('tool.tool123', $disabledFeatures);
     }
