@@ -17,6 +17,7 @@ use Symfony\AI\Mate\Model\ExtensionFilter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;
+use Symfony\Component\Dotenv\Dotenv;
 
 /**
  * Factory for building a Symfony DI Container with MCP extension configurations.
@@ -32,33 +33,34 @@ final class ContainerFactory
 
     public function create(): ContainerBuilder
     {
-        // 1. Build base container with default services
+        // Build base container with default services
         $container = new ContainerBuilder();
         $loader = new PhpFileLoader($container, new FileLocator(\dirname(__DIR__)));
         $loader->load('default.services.php');
 
-        // 2. Read enabled extensions from .mate/extensions.php
+        // Read enabled extensions from .mate/extensions.php
         $enabledExtensions = $this->getEnabledExtensions();
 
-        // 3. Set base parameters
+        // Set base parameters
         $container->setParameter('mate.enabled_extensions', $enabledExtensions);
         $container->setParameter('mate.root_dir', $this->rootDir);
 
-        // 4. Discover extensions and load their services
+        // Discover extensions and load their services
         if ([] !== $enabledExtensions) {
             $logger = $container->get(LoggerInterface::class);
             \assert($logger instanceof LoggerInterface);
 
             $discovery = new ComposerTypeDiscovery($this->rootDir, $logger);
-            $extensions = $discovery->discover($enabledExtensions);
-
-            if ([] !== $extensions) {
-                $this->loadExtensionServices($container, $extensions);
+            foreach ($discovery->discover($enabledExtensions) as $packageName => $data) {
+                $this->loadExtensionIncludes($container, $logger, $packageName, $data['includes']);
             }
         }
 
-        // 5. Load user services last (so they can override extension configs and access parameters)
+        // Load user services last (so they can override extension configs and access parameters)
         $this->loadUserServices($container);
+
+        // Load environment variables if configured
+        $this->loadUserEnvVar($container);
 
         return $container;
     }
@@ -90,19 +92,6 @@ final class ContainerFactory
     }
 
     /**
-     * @param array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}> $extensions
-     */
-    private function loadExtensionServices(ContainerBuilder $container, array $extensions): void
-    {
-        $logger = $container->get(LoggerInterface::class);
-        \assert($logger instanceof LoggerInterface);
-
-        foreach ($extensions as $packageName => $data) {
-            $this->loadExtensionIncludes($container, $logger, $packageName, $data['includes']);
-        }
-    }
-
-    /**
      * @param string[] $includeFiles
      */
     private function loadExtensionIncludes(ContainerBuilder $container, LoggerInterface $logger, string $packageName, array $includeFiles): void
@@ -128,6 +117,27 @@ final class ContainerFactory
                 ]);
             }
         }
+    }
+
+    private function loadUserEnvVar(ContainerBuilder $container): void
+    {
+        $envFile = $container->getParameter('mate.env_file');
+
+        if (null === $envFile || !\is_string($envFile) || '' === $envFile) {
+            return;
+        }
+
+        if (!class_exists(Dotenv::class)) {
+            throw new \RuntimeException('Cannot load any environment file with out Symfony Dotenv. Please run run "composer require symfony/dotenv" and try again.');
+        }
+
+        $extra = [];
+        $localFile = $this->rootDir.\DIRECTORY_SEPARATOR.$envFile.\DIRECTORY_SEPARATOR.'.local';
+        if (!file_exists($localFile)) {
+            $extra[] = $localFile;
+        }
+        
+        (new Dotenv())->load($this->rootDir.\DIRECTORY_SEPARATOR.$envFile, ...$extra);
     }
 
     private function loadUserServices(ContainerBuilder $container): void

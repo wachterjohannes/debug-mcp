@@ -54,20 +54,8 @@ class ServeCommand extends Command
         $cacheDir = $this->container->getParameter('mate.cache_dir');
         \assert(\is_string($cacheDir));
 
-        $envFile = $this->container->getParameter('mate.env_file');
-
-        // 0. Discover extensions with their filters and service files
+        // Discover extensions with their filters and service files
         $extensions = $this->getExtensionsToLoad();
-
-        // 1. Load environment variables from .env files
-        if (null !== $envFile && \is_string($envFile)) {
-            $extra = [];
-            $localFile = $rootDir.\DIRECTORY_SEPARATOR.$envFile.\DIRECTORY_SEPARATOR.'.local';
-            if (!file_exists($localFile)) {
-                $extra[] = $localFile;
-            }
-            (new Dotenv())->load($rootDir.\DIRECTORY_SEPARATOR.$envFile, ...$extra);
-        }
 
         // 2. Create filtered discovery loader
         $loader = new FilteredDiscoveryLoader(
@@ -118,12 +106,12 @@ class ServeCommand extends Command
 
         $extensions = [];
 
-        // 1. Discover Composer-based extensions (with whitelist and filters)
+        // Discover Composer-based extensions (with whitelist and filters)
         foreach ($this->discovery->discover($enabledExtensions) as $packageName => $data) {
             $extensions[$packageName] = $data;
         }
 
-        // 2. Add custom scan directories from configuration
+        // Add custom scan directories from configuration
         $customDirs = [];
         foreach ($scanDirs as $dir) {
             if (\is_string($dir)) {
@@ -142,7 +130,7 @@ class ServeCommand extends Command
             ];
         }
 
-        // 3. Always include local mate/ directory (trusted project code)
+        // Always include local mate/ directory (trusted project code)
         $mateDir = substr(\dirname(__DIR__, 2).'/mate', \strlen($rootDir));
         $extensions['_local'] = [
             'dirs' => [$mateDir],

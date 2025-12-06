@@ -9,49 +9,12 @@
  * file that was distributed with this source code.
  */
 
-use Symfony\Component\Dotenv\Dotenv;
 
 /*
  * Initialize a global registry for disabled MCP features.
  */
 if (!isset($GLOBALS['ai_mate_mcp_disabled_features'])) {
     $GLOBALS['ai_mate_mcp_disabled_features'] = [];
-}
-
-/**
- * Load environment variables from a file in the .mate/ directory.
- *
- * This helper function loads environment variables using the Symfony Dotenv component.
- * Paths are resolved relative to the .mate/ directory.
- *
- * Example usage in .mate/services.php:
- * ```php
- * mateLoadEnv('.env'); // Loads .mate/.env
- * ```
- *
- * @throws RuntimeException If the .mate/ directory or the specified file does not exist
- *
- * @author Johannes Wachter <johannes@sulu.io>
- */
-function mateLoadEnv(string $filename): void
-{
-    // Get the root directory from environment variable set in bin/mate.php
-    $rootDir = $_ENV['MATE_ROOT_DIR'] ?? '';
-    if ('' === $rootDir || !is_string($rootDir)) {
-        throw new RuntimeException('MATE_ROOT_DIR environment variable is not set. This function must be called after bootstrap.');
-    }
-
-    $mateDir = $rootDir.'/.mate';
-    if (!is_dir($mateDir)) {
-        throw new RuntimeException(sprintf('The .mate directory does not exist: %s', $mateDir));
-    }
-
-    $envFile = $mateDir.'/'.ltrim($filename, '/');
-    if (!file_exists($envFile)) {
-        throw new RuntimeException(sprintf('The environment file does not exist: %s', $envFile));
-    }
-
-    (new Dotenv())->load($envFile);
 }
 
 /**
@@ -62,6 +25,7 @@ function mateLoadEnv(string $filename): void
  *
  * Example usage in .mate/services.php:
  * ```php
+ * TODO this is not how the .mate/services.php works. We need to remove this file and use parameters
  * mateDisableFeature('symfony/ai-mate', 'tool', 'php-version');
  * mateDisableFeature('vendor/extension', 'resource', 'some-resource');
  * mateDisableFeature('vendor/extension', 'prompt', 'my-prompt');

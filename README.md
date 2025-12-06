@@ -1,12 +1,12 @@
 # Symfony AI - AI Mate
 
-Framework agnostic platform for [Model Context Protocol](https://modelcontextprotocol.io) server to integrate with your
-AI coding assistant.
+AI Mate is a framework agnostic platform for [Model Context Protocol](https://modelcontextprotocol.io) server to
+integrate with your AI coding assistant.
 
 Supports MCP capabilities (tools, prompts, resources) as server via STDIO transport. Provides extensible architecture for
 adding AI development tools.
 
-**This bundle is experimental.** Experimental features are not covered by Symfony's
+**This library is experimental.** Experimental features are not covered by Symfony's
 [Backward Compatibility Promise](https://symfony.com/doc/current/contributing/code/bc.html).
 
 ## Installation
