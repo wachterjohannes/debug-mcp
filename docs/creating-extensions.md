@@ -74,7 +74,7 @@ return [
 
 ## Dependency Injection
 
-Tools, resources, and prompts support constructor dependency injection via Symfony's DI Container. Dependencies are
+Tools, Resources, and Prompts support constructor dependency injection via Symfony's DI Container. Dependencies are
 automatically resolved and injected.
 
 ### Configuring Services
@@ -113,14 +113,7 @@ return function (ContainerConfigurator $configurator) {
 };
 ```
 
-### Environment Variables
-
-Use `%env(VAR_NAME)%` syntax in service configuration to reference environment variables.
-
 ## Configuration Reference
-
-**Package Type:** `ai-mate-extension` (required)
-FIXME: Should we really require this? What if a package (library) want to have one extra class for the mcp?
 
 **Scan Directories:** `extra.ai-mate.scan-dirs` (optional)
 - Default: Package root directory
@@ -132,17 +125,6 @@ FIXME: Should we really require this? What if a package (library) want to have o
 - Standard Symfony DI configuration format (PHP files)
 - Supports environment variables via `%env()%`
 
-**Feature Filtering:** Control which capabilities to load using helper functions in `.mate/services.php`:
-```php
-<?php
-// .mate/services.php
-
-// Disable specific features from extensions
-mateDisableFeature('vendor/package', 'tool', 'unwanted-tool');
-mateDisableFeature('vendor/package', 'resource', 'unwanted-resource');
-mateDisableFeature('vendor/package', 'prompt', 'unwanted-prompt');
-mateDisableFeature('vendor/package', 'resourceTemplate', 'unwanted-template');
-```
 
 **Security:** Extensions must be explicitly enabled in `.mate/extensions.php`
 - The `discover` command automatically adds discovered extensions to `.mate/extensions.php`
