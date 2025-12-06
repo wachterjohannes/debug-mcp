@@ -16,7 +16,7 @@ use Mcp\Capability\Discovery\DiscoveryState;
 use Mcp\Capability\Registry\Loader\LoaderInterface;
 use Mcp\Capability\RegistryInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\AI\Mate\Model\PluginFilter;
+use Symfony\AI\Mate\Model\ExtensionFilter;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -28,8 +28,8 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 final class FilteredDiscoveryLoader implements LoaderInterface
 {
     /**
-     * @param array<string, array{dirs: string[], filter: PluginFilter, includes: string[]}> $extensions
-     * @param string[]                                                                       $excludeDirs
+     * @param array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}> $extensions
+     * @param string[]                                                                          $excludeDirs
      */
     public function __construct(
         private string $basePath,
@@ -46,26 +46,23 @@ final class FilteredDiscoveryLoader implements LoaderInterface
      */
     public function registerServices(): void
     {
-        foreach ($this->extensions as $packageName => $data) {
-            $scanDirs = $data['dirs'];
-            $filter = $data['filter'];
-
-            $discoveryState = $this->discoverCapabilities($scanDirs);
+        foreach ($this->extensions as $data) {
+            $discoveryState = $this->discoverCapabilities($data['dirs']);
 
             foreach ($discoveryState->getTools() as $tool) {
-                $this->maybeRegisterHandler($tool->handler, $filter, $packageName);
+                $this->maybeRegisterHandler($tool->handler);
             }
 
             foreach ($discoveryState->getResources() as $resource) {
-                $this->maybeRegisterHandler($resource->handler, $filter, $packageName);
+                $this->maybeRegisterHandler($resource->handler);
             }
 
             foreach ($discoveryState->getPrompts() as $prompt) {
-                $this->maybeRegisterHandler($prompt->handler, $filter, $packageName);
+                $this->maybeRegisterHandler($prompt->handler);
             }
 
             foreach ($discoveryState->getResourceTemplates() as $template) {
-                $this->maybeRegisterHandler($template->handler, $filter, $packageName);
+                $this->maybeRegisterHandler($template->handler);
             }
         }
     }
@@ -78,19 +75,16 @@ final class FilteredDiscoveryLoader implements LoaderInterface
         $allResourceTemplates = [];
 
         foreach ($this->extensions as $packageName => $data) {
-            $scanDirs = $data['dirs'];
-            $filter = $data['filter'];
+            /** @var ExtensionFilter $filter */
+            $filter = $data['filter']->withDisabledFeatures($packageName);
 
-            $discoveryState = $this->discoverCapabilities($scanDirs);
+            $discoveryState = $this->discoverCapabilities($data['dirs']);
 
-            // Filter and collect tools
             foreach ($discoveryState->getTools() as $name => $tool) {
-                $className = $this->extractClassName($tool->handler);
-                if (null !== $className && !$filter->allows($className)) {
-                    $this->logger->debug('Excluding tool by filter', [
+                if (!$filter->allowsFeature('tool', $name)) {
+                    $this->logger->debug('Excluding tool by feature filter', [
                         'package' => $packageName,
                         'tool' => $name,
-                        'class' => $className,
                     ]);
                     continue;
                 }
@@ -98,14 +92,11 @@ final class FilteredDiscoveryLoader implements LoaderInterface
                 $allTools[$name] = $tool;
             }
 
-            // Filter and collect resources
             foreach ($discoveryState->getResources() as $uri => $resource) {
-                $className = $this->extractClassName($resource->handler);
-                if (null !== $className && !$filter->allows($className)) {
-                    $this->logger->debug('Excluding resource by filter', [
+                if (!$filter->allowsFeature('resource', $uri)) {
+                    $this->logger->debug('Excluding resource by feature filter', [
                         'package' => $packageName,
                         'resource' => $uri,
-                        'class' => $className,
                     ]);
                     continue;
                 }
@@ -113,14 +104,11 @@ final class FilteredDiscoveryLoader implements LoaderInterface
                 $allResources[$uri] = $resource;
             }
 
-            // Filter and collect prompts
             foreach ($discoveryState->getPrompts() as $name => $prompt) {
-                $className = $this->extractClassName($prompt->handler);
-                if (null !== $className && !$filter->allows($className)) {
-                    $this->logger->debug('Excluding prompt by filter', [
+                if (!$filter->allowsFeature('prompt', $name)) {
+                    $this->logger->debug('Excluding prompt by feature filter', [
                         'package' => $packageName,
                         'prompt' => $name,
-                        'class' => $className,
                     ]);
                     continue;
                 }
@@ -130,12 +118,11 @@ final class FilteredDiscoveryLoader implements LoaderInterface
 
             // Filter and collect resource templates
             foreach ($discoveryState->getResourceTemplates() as $uriTemplate => $template) {
-                $className = $this->extractClassName($template->handler);
-                if (null !== $className && !$filter->allows($className)) {
-                    $this->logger->debug('Excluding resource template by filter', [
+                // Check if feature is disabled
+                if (!$filter->allowsFeature('resourceTemplate', $uriTemplate)) {
+                    $this->logger->debug('Excluding resource template by feature filter', [
                         'package' => $packageName,
                         'template' => $uriTemplate,
-                        'class' => $className,
                     ]);
                     continue;
                 }
@@ -144,7 +131,6 @@ final class FilteredDiscoveryLoader implements LoaderInterface
             }
         }
 
-        // Create filtered discovery state and apply to registry
         $filteredState = new DiscoveryState(
             $allTools,
             $allResources,
@@ -165,14 +151,10 @@ final class FilteredDiscoveryLoader implements LoaderInterface
     /**
      * @param \Closure|array{0: object|string, 1: string}|string $handler
      */
-    private function maybeRegisterHandler(\Closure|array|string $handler, PluginFilter $filter, string $packageName): void
+    private function maybeRegisterHandler(\Closure|array|string $handler): void
     {
         $className = $this->extractClassName($handler);
         if (null === $className) {
-            return;
-        }
-
-        if (!$filter->allows($className)) {
             return;
         }
 
@@ -190,8 +172,6 @@ final class FilteredDiscoveryLoader implements LoaderInterface
     }
 
     /**
-     * Extract class name from handler.
-     *
      * @param \Closure|array{0: object|string, 1: string}|string $handler
      */
     private function extractClassName(\Closure|array|string $handler): ?string
@@ -204,19 +184,14 @@ final class FilteredDiscoveryLoader implements LoaderInterface
             return class_exists($handler) ? $handler : null;
         }
 
-        // Handler is array{0: object|string, 1: string}
         $class = $handler[0];
         if (\is_object($class)) {
             return $class::class;
         }
 
-        // $class is string
         return class_exists($class) ? $class : null;
     }
 
-    /**
-     * Register a class as a service in the container if not already registered.
-     */
     private function registerService(string $className): void
     {
         if ($this->container->has($className)) {

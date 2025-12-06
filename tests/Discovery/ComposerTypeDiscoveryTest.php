@@ -14,7 +14,7 @@ namespace Symfony\AI\Mate\Tests\Discovery;
 use PHPUnit\Framework\TestCase;
 use Psr\Log\NullLogger;
 use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
-use Symfony\AI\Mate\Model\PluginFilter;
+use Symfony\AI\Mate\Model\ExtensionFilter;
 
 class ComposerTypeDiscoveryTest extends TestCase
 {
@@ -44,7 +44,7 @@ class ComposerTypeDiscoveryTest extends TestCase
         $this->assertArrayHasKey('includes', $extensions['vendor/package-a']);
 
         $this->assertContains('vendor/vendor/package-a/src', $extensions['vendor/package-a']['dirs']);
-        $this->assertInstanceOf(PluginFilter::class, $extensions['vendor/package-a']['filter']);
+        $this->assertInstanceOf(ExtensionFilter::class, $extensions['vendor/package-a']['filter']);
     }
 
     public function testIgnoresPackagesWithoutAiMateConfig(): void
@@ -78,11 +78,11 @@ class ComposerTypeDiscoveryTest extends TestCase
             new NullLogger()
         );
 
-        $enabledPlugins = [
+        $enabledExtensions = [
             'vendor/package-a',
         ];
 
-        $extensions = $discovery->discover($enabledPlugins);
+        $extensions = $discovery->discover($enabledExtensions);
 
         $this->assertCount(1, $extensions);
         $this->assertArrayHasKey('vendor/package-a', $extensions);
@@ -96,17 +96,17 @@ class ComposerTypeDiscoveryTest extends TestCase
             new NullLogger()
         );
 
-        $enabledPlugins = [
+        $enabledExtensions = [
             'vendor/package-a',
             'vendor/package-b',
         ];
 
-        $extensions = $discovery->discover($enabledPlugins);
+        $extensions = $discovery->discover($enabledExtensions);
 
         $this->assertCount(2, $extensions);
         $this->assertArrayHasKey('vendor/package-a', $extensions);
         $this->assertArrayHasKey('vendor/package-b', $extensions);
-        $this->assertInstanceOf(PluginFilter::class, $extensions['vendor/package-a']['filter']);
+        $this->assertInstanceOf(ExtensionFilter::class, $extensions['vendor/package-a']['filter']);
     }
 
     public function testExtractsIncludeFiles(): void

@@ -16,7 +16,7 @@ This component provides an MCP (Model Context Protocol) server implementation th
 - **`src/Command/ServeCommand.php`** - Starts the MCP server with STDIO transport
 - **`src/Discovery/DiscoveryManager.php`** - Coordinates extension discovery from multiple sources
 - **`src/Discovery/ComposerDiscovery.php`** - Scans vendor packages for MCP extensions via composer.json extra section
-- **`src/Discovery/LocalDiscovery.php`** - Scans local `mcp/` directory using reflection for MCP attributes
+- **`src/Discovery/LocalDiscovery.php`** - Scans local `mate/` directory using reflection for MCP attributes
 
 ### Key Features
 
@@ -27,8 +27,8 @@ The component supports MCP capabilities through attribute-based discovery:
 - **Prompts** - Pre-configured prompts via `#[McpPrompt]` attribute
 
 Extensions can be:
-- **Vendor packages** - Declared in composer.json extra section, must be whitelisted in `.mcp.php`
-- **Local files** - PHP files in `mcp/` directory, automatically enabled
+- **Vendor packages** - Declared in composer.json extra section, must be enabled in `.mate/extensions.php`
+- **Local files** - PHP files in `mate/` directory, automatically enabled
 
 ## Essential Commands
 

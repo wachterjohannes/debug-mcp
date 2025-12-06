@@ -12,7 +12,7 @@
 namespace Symfony\AI\Mate\Discovery;
 
 use Psr\Log\LoggerInterface;
-use Symfony\AI\Mate\Model\PluginFilter;
+use Symfony\AI\Mate\Model\ExtensionFilter;
 
 /**
  * Discovers MCP extensions via extra.ai-mate config in composer.json.
@@ -45,11 +45,11 @@ final class ComposerTypeDiscovery
     }
 
     /**
-     * @param array<int, string> $enabledPlugins List of enabled package names
+     * @param string[] $enabledExtensions
      *
-     * @return array<string, array{dirs: string[], filter: PluginFilter, includes: string[]}> Package name => dirs, filter, and include files
+     * @return array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}>
      */
-    public function discover(array $enabledPlugins = []): array
+    public function discover(array $enabledExtensions = []): array
     {
         $installed = $this->getInstalledPackages();
         $extensions = [];
@@ -66,7 +66,7 @@ final class ComposerTypeDiscovery
             }
 
             // Check if package is whitelisted
-            if ([] !== $enabledPlugins && !\in_array($packageName, $enabledPlugins, true)) {
+            if ([] !== $enabledExtensions && !\in_array($packageName, $enabledExtensions, true)) {
                 $this->logger->debug('Skipping non-whitelisted extension', ['package' => $packageName]);
 
                 continue;
@@ -77,7 +77,7 @@ final class ComposerTypeDiscovery
                 $includeFiles = $this->extractIncludeFiles($package, $packageName);
                 $extensions[$packageName] = [
                     'dirs' => $scanDirs,
-                    'filter' => PluginFilter::all(),
+                    'filter' => ExtensionFilter::all(),
                     'includes' => $includeFiles,
                 ];
             }

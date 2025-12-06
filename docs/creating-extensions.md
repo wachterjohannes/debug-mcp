@@ -132,19 +132,26 @@ FIXME: Should we really require this? What if a package (library) want to have o
 - Standard Symfony DI configuration format (PHP files)
 - Supports environment variables via `%env()%`
 
-**Plugin Filters:** Control which capabilities to load
-- No filter: Include all capabilities from package
-- `exclude`: Exclude specific class names (string or array)
-- `include_only`: Only load specific class names (string or array)
-- Cannot use both `exclude` and `include_only` for same package
-FIXME: Should we out source this to the extension instead? Ie, let them provide config to disable?
+**Feature Filtering:** Control which capabilities to load using helper functions in `.mate/services.php`:
+```php
+<?php
+// .mate/services.php
 
-**Security:** Extensions must be whitelisted in `enabled_plugins`
-FIXME: I like this. But maybe we must improve our "discover" command to automatically add plugins
+// Disable specific features from extensions
+mcpDisableFeature('vendor/package', 'tool', 'unwanted-tool');
+mcpDisableFeature('vendor/package', 'resource', 'unwanted-resource');
+mcpDisableFeature('vendor/package', 'prompt', 'unwanted-prompt');
+mcpDisableFeature('vendor/package', 'resourceTemplate', 'unwanted-template');
+```
+
+**Security:** Extensions must be explicitly enabled in `.mate/extensions.php`
+- The `discover` command automatically adds discovered extensions to `.mate/extensions.php`
+- All extensions default to `enabled: true` when discovered
+- Set `enabled: false` to disable an extension
 
 ## Troubleshooting
 
-- **Not discovered?** Check `type: "ai-mate-extension"` in composer.json
-- **Not loaded?** Add package to `enabled_plugins` in .mcp.php
+- **Not discovered?** Ensure `extra.ai-mate` section exists in composer.json
+- **Not loaded?** Check that extension is enabled in `.mate/extensions.php`
 - **Capabilities not found?** Verify MCP attributes and scan directories
 - **Dependency not found?** Check services.php or ensure interface has implementation
