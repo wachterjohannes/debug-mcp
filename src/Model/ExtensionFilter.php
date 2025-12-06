@@ -39,7 +39,7 @@ final class ExtensionFilter
 
     public function withDisabledFeatures(string $extension): self
     {
-        $disabledFeatures = mcpGetDisabledFeatures($extension);
+        $disabledFeatures = mateGetDisabledFeatures($extension);
         if ([] === $disabledFeatures) {
             return $this;
         }

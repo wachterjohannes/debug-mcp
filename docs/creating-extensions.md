@@ -138,10 +138,10 @@ FIXME: Should we really require this? What if a package (library) want to have o
 // .mate/services.php
 
 // Disable specific features from extensions
-mcpDisableFeature('vendor/package', 'tool', 'unwanted-tool');
-mcpDisableFeature('vendor/package', 'resource', 'unwanted-resource');
-mcpDisableFeature('vendor/package', 'prompt', 'unwanted-prompt');
-mcpDisableFeature('vendor/package', 'resourceTemplate', 'unwanted-template');
+mateDisableFeature('vendor/package', 'tool', 'unwanted-tool');
+mateDisableFeature('vendor/package', 'resource', 'unwanted-resource');
+mateDisableFeature('vendor/package', 'prompt', 'unwanted-prompt');
+mateDisableFeature('vendor/package', 'resourceTemplate', 'unwanted-template');
 ```
 
 **Security:** Extensions must be explicitly enabled in `.mate/extensions.php`

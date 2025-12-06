@@ -41,6 +41,7 @@ The bridge is automatically discovered when installed as a Composer package with
 
 ```bash
 composer require symfony/ai-mate-symfony
+vendor/bin/mate init
 vendor/bin/mate discover
 ```
 
