@@ -142,7 +142,7 @@ final class ContainerFactory
     }
 
     /**
-     * @param array{dirs: array<string>, filter: ExtensionFilter, includes: array<string>} $rootProject
+     * @param array{dirs: array<string>, includes: array<string>} $rootProject
      */
     private function loadUserServices(array $rootProject, ContainerBuilder $container): void
     {
