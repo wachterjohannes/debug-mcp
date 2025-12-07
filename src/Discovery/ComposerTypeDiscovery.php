@@ -32,8 +32,7 @@ final class ComposerTypeDiscovery
     /**
      * @var array<string, array{
      *     name: string,
-     *     type: string,
-     *     extra?: array<string, mixed>,
+     *     extra: array<string, mixed>,
      * }>|null
      */
     private ?array $installedPackages = null;
@@ -57,15 +56,13 @@ final class ComposerTypeDiscovery
         foreach ($installed as $package) {
             $packageName = $package['name'];
 
-            // Check if package has ai-mate config in extra section
-            $extra = $package['extra'] ?? [];
-            $aiMateConfig = $extra['ai-mate'] ?? null;
-
-            if (null === $aiMateConfig || !\is_array($aiMateConfig)) {
+            // Check if the package has "ai-mate" config in the extra section
+            $aiMateConfig = $package['extra']['ai-mate'] ?? null;
+            if (!\is_array($aiMateConfig)) {
                 continue;
             }
 
-            // Check if package is whitelisted
+            // Check if the package is enabled
             if ([] !== $enabledExtensions && !\in_array($packageName, $enabledExtensions, true)) {
                 $this->logger->debug('Skipping non-whitelisted extension', ['package' => $packageName]);
 
@@ -87,10 +84,11 @@ final class ComposerTypeDiscovery
     }
 
     /**
+     * Check vendor/composer/installed.json for installed packages.
+     *
      * @return array<string, array{
      *     name: string,
-     *     type: string,
-     *     extra?: array<string, mixed>,
+     *     extra: array<string, mixed>,
      * }>
      */
     private function getInstalledPackages(): array
@@ -139,12 +137,11 @@ final class ComposerTypeDiscovery
 
             /** @var array{
              *     name: string,
-             *     type: string,
-             *     extra?: array<string, mixed>,
+             *     extra: array<string, mixed>,
              * } $validPackage */
             $validPackage = [
                 'name' => $package['name'],
-                'type' => $package['type'] ?? '',
+                'extra' => [],
             ];
 
             if (isset($package['extra']) && \is_array($package['extra'])) {
@@ -162,17 +159,14 @@ final class ComposerTypeDiscovery
     /**
      * @param array{
      *     name: string,
-     *     type: string,
-     *     extra?: array<string, mixed>,
+     *     extra: array<string, mixed>,
      * } $package
      *
-     * @return string[]
+     * @return string[] list of directories with paths relative to project root.
      */
     private function extractScanDirs(array $package, string $packageName): array
     {
-        $extra = $package['extra'] ?? [];
-
-        $aiMateConfig = $extra['ai-mate'] ?? null;
+        $aiMateConfig = $package['extra']['ai-mate'] ?? null;
         if (null === $aiMateConfig) {
             // Default: scan package root directory if no config provided
             $defaultDir = 'vendor/'.$packageName;
@@ -203,7 +197,7 @@ final class ComposerTypeDiscovery
 
         $validDirs = [];
         foreach ($scanDirs as $dir) {
-            if (!\is_string($dir) || '' === trim($dir)) {
+            if (!\is_string($dir) || '' === trim($dir) || str_contains($dir, '..')) {
                 continue;
             }
 
@@ -230,17 +224,14 @@ final class ComposerTypeDiscovery
      *
      * @param array{
      *     name: string,
-     *     type: string,
-     *     extra?: array<string, mixed>,
+     *     extra: array<string, mixed>,
      * } $package
      *
-     * @return string[]
+     * @return string[] list of files with paths relative to project root.
      */
     private function extractIncludeFiles(array $package, string $packageName): array
     {
-        $extra = $package['extra'] ?? [];
-        $aiMateConfig = $extra['ai-mate'] ?? null;
-
+        $aiMateConfig = $package['extra']['ai-mate'] ?? null;
         if (null === $aiMateConfig || !\is_array($aiMateConfig)) {
             return [];
         }
@@ -260,12 +251,12 @@ final class ComposerTypeDiscovery
 
         $validFiles = [];
         foreach ($includes as $file) {
-            if (!\is_string($file) || '' === trim($file)) {
+            if (!\is_string($file) || '' === trim($file) || str_contains($file, '..')) {
                 continue;
             }
 
-            $fullPath = $this->rootDir.'/vendor/'.$packageName.'/'.ltrim($file, '/');
-            if (!file_exists($fullPath)) {
+            $fullPath = '/vendor/'.$packageName.'/'.ltrim($file, '/');
+            if (!file_exists($this->rootDir.$fullPath)) {
                 $this->logger->warning('Include file does not exist', [
                     'package' => $packageName,
                     'file' => $fullPath,

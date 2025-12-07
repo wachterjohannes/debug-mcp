@@ -54,19 +54,15 @@ class ServeCommand extends Command
         $cacheDir = $this->container->getParameter('mate.cache_dir');
         \assert(\is_string($cacheDir));
 
-        // Discover extensions with their filters and service files
-        $extensions = $this->getExtensionsToLoad();
-
-        // 2. Create filtered discovery loader
+        // Create filtered discovery loader
         $loader = new FilteredDiscoveryLoader(
             basePath: $rootDir,
-            extensions: $extensions,
-            excludeDirs: [],
+            extensions: $this->getExtensionsToLoad(),
             logger: $this->logger,
             container: $this->container,
         );
 
-        // 3. Pre-register discovered services in the container (before compilation)
+        // Pre-register discovered services in the container (before compilation)
         $loader->registerServices();
 
         // 4. Compile the container (resolves parameters and validates)
@@ -98,20 +94,21 @@ class ServeCommand extends Command
         $rootDir = $this->container->getParameter('mate.root_dir');
         \assert(\is_string($rootDir));
 
-        $enabledExtensions = $this->container->getParameter('mate.enabled_extensions');
-        \assert(\is_array($enabledExtensions));
-        /** @var array<int, string> $enabledExtensions */
+        $packageNames = $this->container->getParameter('mate.enabled_extensions');
+        \assert(\is_array($packageNames));
+        /** @var array<int, string> $packageNames */
+
         $scanDirs = $this->container->getParameter('mate.scan_dirs');
         \assert(\is_array($scanDirs));
 
         $extensions = [];
 
         // Discover Composer-based extensions (with whitelist and filters)
-        foreach ($this->discovery->discover($enabledExtensions) as $packageName => $data) {
+        foreach ($this->discovery->discover($packageNames) as $packageName => $data) {
             $extensions[$packageName] = $data;
         }
 
-        // Add custom scan directories from configuration
+        // Add custom scan directories from the configuration
         $customDirs = [];
         foreach ($scanDirs as $dir) {
             if (\is_string($dir)) {
@@ -129,14 +126,6 @@ class ServeCommand extends Command
                 'includes' => [],
             ];
         }
-
-        // Always include local mate/ directory (trusted project code)
-        $mateDir = substr(\dirname(__DIR__, 2).'/mate', \strlen($rootDir));
-        $extensions['_local'] = [
-            'dirs' => [$mateDir],
-            'filter' => ExtensionFilter::all(),
-            'includes' => [],
-        ];
 
         return $extensions;
     }

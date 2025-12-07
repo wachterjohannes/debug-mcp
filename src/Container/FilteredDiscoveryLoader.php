@@ -29,12 +29,10 @@ final class FilteredDiscoveryLoader implements LoaderInterface
 {
     /**
      * @param array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}> $extensions
-     * @param string[]                                                                          $excludeDirs
      */
     public function __construct(
         private string $basePath,
         private array $extensions,
-        private array $excludeDirs,
         private LoggerInterface $logger,
         private ContainerBuilder $container,
     ) {
@@ -118,7 +116,7 @@ final class FilteredDiscoveryLoader implements LoaderInterface
 
             // Filter and collect resource templates
             foreach ($discoveryState->getResourceTemplates() as $uriTemplate => $template) {
-                // Check if feature is disabled
+                // Check if a feature is disabled
                 if (!$filter->allowsFeature('resourceTemplate', $uriTemplate)) {
                     $this->logger->debug('Excluding resource template by feature filter', [
                         'package' => $packageName,
@@ -168,7 +166,7 @@ final class FilteredDiscoveryLoader implements LoaderInterface
     {
         $discoverer = new Discoverer($this->logger);
 
-        return $discoverer->discover($this->basePath, $scanDirs, $this->excludeDirs);
+        return $discoverer->discover($this->basePath, $scanDirs);
     }
 
     /**

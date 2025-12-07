@@ -66,7 +66,7 @@ final class ContainerFactory
     }
 
     /**
-     * @return string[]
+     * @return string[] Package names
      */
     private function getEnabledExtensions(): array
     {
@@ -136,7 +136,7 @@ final class ContainerFactory
         if (!file_exists($localFile)) {
             $extra[] = $localFile;
         }
-        
+
         (new Dotenv())->load($this->rootDir.\DIRECTORY_SEPARATOR.$envFile, ...$extra);
     }
 
