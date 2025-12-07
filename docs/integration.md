@@ -42,6 +42,13 @@ To connect Symfony AI Mate to Claude Desktop:
 
 **Note**: Replace `/absolute/path/to/` with the actual path to your project's vendor directory.
 
+### Claude Code
+
+```bash
+claude mcp add mate $(pwd)/vendor/bin/mate serve --scope local
+claude mcp list  # Verify: mate - ✓ Connected
+```
+
 ## Cursor
 
 Configuration for Cursor coming soon.

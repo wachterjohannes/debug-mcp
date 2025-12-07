@@ -81,7 +81,6 @@ class ServeCommand extends Command
             ->setServerInfo('ai-mate', '0.1.0', 'Symfony AI development assistant MCP server')
             ->setContainer($this->container)
             ->addLoaders($loader)
-            ->setDiscovery(\dirname(__DIR__).'/Capability')
             ->setSession(new FileSessionStore($cacheDir.'/sessions'))
             ->setLogger($this->logger)
             ->build();
@@ -105,8 +104,6 @@ class ServeCommand extends Command
         $packageNames = $this->container->getParameter('mate.enabled_extensions');
         \assert(\is_array($packageNames));
         /** @var array<int, string> $packageNames */
-        $scanDirs = $this->container->getParameter('mate.scan_dirs');
-        \assert(\is_array($scanDirs));
 
         $extensions = [];
 
@@ -115,23 +112,7 @@ class ServeCommand extends Command
             $extensions[$packageName] = $data;
         }
 
-        // Add custom scan directories from the configuration
-        $customDirs = [];
-        foreach ($scanDirs as $dir) {
-            if (\is_string($dir)) {
-                $dir = trim($dir);
-                if ('' !== $dir) {
-                    // TODO make sure it is inside the package.
-                    $customDirs[] = $dir;
-                }
-            }
-        }
-        if ([] !== $customDirs) {
-            $extensions['_custom'] = [
-                'dirs' => $customDirs,
-                'includes' => [],
-            ];
-        }
+        $extensions['_custom'] = $this->discovery->discoverRootProject();
 
         return $extensions;
     }

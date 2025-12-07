@@ -42,6 +42,10 @@ class DiscoverCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $io->title('MCP Extension Discovery');
+        $io->text('Scanning for packages with <info>extra.ai-mate</info> configuration...');
+        $io->newLine();
+
         $discovery = new ComposerTypeDiscovery($this->rootDir, $this->logger);
 
         // Discover all extensions, regardless of whitelist
@@ -49,31 +53,55 @@ class DiscoverCommand extends Command
 
         $count = \count($extensions);
         if (0 === $count) {
-            $io->warning('No MCP extensions found. Packages must have "extra.ai-mate" config in composer.json.');
+            $io->warning([
+                'No MCP extensions found.',
+                'Packages must have "extra.ai-mate" configuration in their composer.json.',
+            ]);
+            $io->note('Run "composer require vendor/package" to install MCP extensions.');
 
             return Command::SUCCESS;
-        }
-
-        $io->success(\sprintf('Discovered %d MCP extension%s.', $count, 1 === $count ? '' : 's'));
-        $io->writeln('');
-
-        $io->section('Discovered Extensions');
-        foreach ($extensions as $packageName => $data) {
-            $io->writeln(\sprintf('  • <info>%s</info>', $packageName));
-            foreach ($data['dirs'] as $dir) {
-                $io->writeln(\sprintf('    └─ %s', $dir));
-            }
         }
 
         // Load existing extensions.php if it exists
         $extensionsFile = $this->rootDir.'/.mate/extensions.php';
         $existingExtensions = [];
+        $newPackages = [];
+        $removedPackages = [];
         if (file_exists($extensionsFile)) {
             $existingExtensions = include $extensionsFile;
             if (!\is_array($existingExtensions)) {
                 $existingExtensions = [];
             }
         }
+
+        // Track new packages
+        foreach ($extensions as $packageName => $data) {
+            if (!isset($existingExtensions[$packageName])) {
+                $newPackages[] = $packageName;
+            }
+        }
+
+        // Track removed packages
+        foreach ($existingExtensions as $packageName => $data) {
+            if (!isset($extensions[$packageName])) {
+                $removedPackages[] = $packageName;
+            }
+        }
+
+        // Display discovered extensions
+        $io->section(\sprintf('Discovered %d Extension%s', $count, 1 === $count ? '' : 's'));
+        $rows = [];
+        foreach ($extensions as $packageName => $data) {
+            $isNew = \in_array($packageName, $newPackages, true);
+            $status = $isNew ? '<fg=green>NEW</>' : '<fg=gray>existing</>';
+            $dirCount = \count($data['dirs']);
+            $rows[] = [
+                $status,
+                $packageName,
+                \sprintf('%d director%s', $dirCount, 1 === $dirCount ? 'y' : 'ies'),
+            ];
+        }
+        $io->table(['Status', 'Package', 'Scan Directories'], $rows);
 
         // Merge discovered extensions with existing config
         $finalExtensions = [];
@@ -95,9 +123,24 @@ class DiscoverCommand extends Command
         // Write to .mate/extensions.php
         $this->writeExtensionsFile($extensionsFile, $finalExtensions);
 
-        $io->writeln('');
-        $io->success(\sprintf('Updated %s', $extensionsFile));
-        $io->note('Edit this file to enable/disable specific extensions.');
+        $io->success(\sprintf('Configuration written to: %s', $extensionsFile));
+
+        if (\count($newPackages) > 0) {
+            $io->note(\sprintf('Added %d new extension%s. All extensions are enabled by default.', \count($newPackages), 1 === \count($newPackages) ? '' : 's'));
+        }
+
+        if (\count($removedPackages) > 0) {
+            $io->warning([
+                \sprintf('Removed %d extension%s no longer found:', \count($removedPackages), 1 === \count($removedPackages) ? '' : 's'),
+                ...array_map(fn ($pkg) => '  • '.$pkg, $removedPackages),
+            ]);
+        }
+
+        $io->comment([
+            'Next steps:',
+            '  • Edit .mate/extensions.php to enable/disable specific extensions',
+            '  • Run "vendor/bin/mate serve" to start the MCP server',
+        ]);
 
         return Command::SUCCESS;
     }

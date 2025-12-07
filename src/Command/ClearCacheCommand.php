@@ -37,10 +37,14 @@ class ClearCacheCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
+        $io->title('Cache Management');
+        $io->text(\sprintf('Cache directory: <info>%s</info>', $this->cacheDir));
+        $io->newLine();
+
         $cacheDir = $this->cacheDir;
 
         if (!is_dir($cacheDir)) {
-            $io->success('Cache directory does not exist. Nothing to clear.');
+            $io->note('Cache directory does not exist. Nothing to clear.');
 
             return Command::SUCCESS;
         }
@@ -49,17 +53,47 @@ class ClearCacheCommand extends Command
         $finder->files()->in($cacheDir);
 
         $count = 0;
+        $totalSize = 0;
+        $fileList = [];
+
         foreach ($finder as $file) {
+            $size = $file->getSize();
+            $totalSize += $size;
+            $fileList[] = [
+                basename($file->getFilename()),
+                $this->formatBytes($size),
+            ];
             unlink($file->getRealPath());
             ++$count;
         }
 
         if ($count > 0) {
-            $io->success(\sprintf('Cleared %d cache file(s) from "%s"', $count, $cacheDir));
+            $io->section('Cleared Files');
+            $io->table(['File', 'Size'], $fileList);
+
+            $io->success(\sprintf(
+                'Successfully cleared %d cache file%s (%s)',
+                $count,
+                1 === $count ? '' : 's',
+                $this->formatBytes($totalSize)
+            ));
         } else {
-            $io->success('Cache is already empty.');
+            $io->info('Cache directory is already empty.');
         }
 
         return Command::SUCCESS;
+    }
+
+    private function formatBytes(int $bytes): string
+    {
+        if ($bytes < 1024) {
+            return $bytes.' B';
+        }
+
+        if ($bytes < 1048576) {
+            return round($bytes / 1024, 2).' KB';
+        }
+
+        return round($bytes / 1048576, 2).' MB';
     }
 }

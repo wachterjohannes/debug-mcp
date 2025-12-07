@@ -81,6 +81,17 @@ final class ComposerTypeDiscovery
         return $extensions;
     }
 
+    public function discoverRootProject(): array
+    {
+        $rootComposer = json_decode(file_get_contents($this->rootDir.'/composer.json'), true);
+        $scanDirs = $rootComposer['extra']['ai-mate']['scan-dirs'] ?? [];
+
+        return [
+            'dirs' => $scanDirs,
+            'includes' => $rootComposer['extra']['ai-mate']['includes'] ?? [],
+        ];
+    }
+
     /**
      * Check vendor/composer/installed.json for installed packages.
      *
@@ -253,8 +264,8 @@ final class ComposerTypeDiscovery
                 continue;
             }
 
-            $fullPath = '/vendor/'.$packageName.'/'.ltrim($file, '/');
-            if (!file_exists($this->rootDir.$fullPath)) {
+            $fullPath = $this->rootDir.'/vendor/'.$packageName.'/'.ltrim($file, '/');
+            if (!file_exists($fullPath)) {
                 $this->logger->warning('Include file does not exist', [
                     'package' => $packageName,
                     'file' => $fullPath,
