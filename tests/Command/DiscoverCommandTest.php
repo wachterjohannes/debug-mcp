@@ -42,7 +42,7 @@ class DiscoverCommandTest extends TestCase
             $this->assertTrue($extensions['vendor/package-b']['enabled']);
 
             $output = $tester->getDisplay();
-            $this->assertStringContainsString('Discovered 2 MCP extensions', $output);
+            $this->assertStringContainsString('Discovered 2 Extension', $output);
             $this->assertStringContainsString('vendor/package-a', $output);
             $this->assertStringContainsString('vendor/package-b', $output);
         } finally {

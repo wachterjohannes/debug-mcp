@@ -48,10 +48,12 @@ class InitCommandTest extends TestCase
         $tester->execute([]);
 
         $output = $tester->getDisplay();
-        $this->assertStringContainsString('Wrote', $output);
+        $this->assertStringContainsString('AI Mate Initialization', $output);
         $this->assertStringContainsString('extensions.php', $output);
         $this->assertStringContainsString('services.php', $output);
         $this->assertStringContainsString('vendor/bin/mate discover', $output);
+        $this->assertStringContainsString('Summary', $output);
+        $this->assertStringContainsString('Created', $output);
     }
 
     public function testDoesNotOverwriteExistingFileWithoutConfirmation(): void
