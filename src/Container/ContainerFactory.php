@@ -141,6 +141,9 @@ final class ContainerFactory
         (new Dotenv())->load($this->rootDir.\DIRECTORY_SEPARATOR.$envFile, ...$extra);
     }
 
+    /**
+     * @param array{dirs: array<string>, filter: ExtensionFilter, includes: array<string>} $rootProject
+     */
     private function loadUserServices(array $rootProject, ContainerBuilder $container): void
     {
         $logger = $container->get(LoggerInterface::class);
@@ -149,7 +152,7 @@ final class ContainerFactory
         $loader = new PhpFileLoader($container, new FileLocator($this->rootDir.'/.mate'));
         foreach ($rootProject['includes'] as $include) {
             try {
-                $loader->load($include);;
+                $loader->load($include);
 
                 $logger->debug('Loaded user services', [
                     'file' => $include,

@@ -105,6 +105,7 @@ class ServeCommand extends Command
         \assert(\is_array($packageNames));
         /** @var array<int, string> $packageNames */
 
+        /** @var array<string, array{dirs: array<string>, includes: array<string>}> $extensions */
         $extensions = [];
 
         // Discover enabled Composer-based extensions
