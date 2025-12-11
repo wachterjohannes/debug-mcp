@@ -45,11 +45,11 @@ class InitCommand extends Command
 
         $files = ['extensions.php', 'services.php', '.gitignore'];
         foreach ($files as $file) {
-            $fullPath = $mateDir . '/extensions.php';
+            $fullPath = $mateDir.'/extensions.php';
             if (!file_exists($fullPath)) {
                 $this->copyTemplate($file, $fullPath);
                 $io->success(\sprintf('Wrote %s', $fullPath));
-            } elseif ($io->confirm(sprintf('%s already exists. Overwrite? (y/n)', $fullPath), false)) {
+            } elseif ($io->confirm(\sprintf('%s already exists. Overwrite? (y/n)', $fullPath), false)) {
                 unlink($fullPath);
                 $this->copyTemplate($file, $fullPath);
                 $io->success(\sprintf('Wrote %s', $fullPath));

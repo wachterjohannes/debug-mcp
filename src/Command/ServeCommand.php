@@ -54,13 +54,15 @@ class ServeCommand extends Command
         $cacheDir = $this->container->getParameter('mate.cache_dir');
         \assert(\is_string($cacheDir));
 
-
         // Pre-register discovered services in the container (before compilation)
         $discovery = new Discoverer($this->logger);
         $extensions = $this->getExtensionsToLoad();
         (new ServiceDiscovery())->registerServices($discovery, $this->container, $rootDir, $extensions);
 
+
         $disabledVendorFeatures = $this->container->getParameter('mate.disabled_features') ?? [];
+        \assert(\is_array($disabledVendorFeatures));
+        /** @var array<string, array<string, array{enabled: bool}>> $disabledVendorFeatures */
 
         // Compile the container (resolves parameters and validates)
         $this->container->compile();
@@ -103,7 +105,6 @@ class ServeCommand extends Command
         $packageNames = $this->container->getParameter('mate.enabled_extensions');
         \assert(\is_array($packageNames));
         /** @var array<int, string> $packageNames */
-
         $scanDirs = $this->container->getParameter('mate.scan_dirs');
         \assert(\is_array($scanDirs));
 

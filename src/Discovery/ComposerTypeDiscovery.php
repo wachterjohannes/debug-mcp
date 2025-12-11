@@ -70,7 +70,7 @@ final class ComposerTypeDiscovery
 
             $scanDirs = $this->extractScanDirs($package, $packageName);
             $includeFiles = $this->extractIncludeFiles($package, $packageName);
-            if ([] !== $scanDirs || $includeFiles !== []) {
+            if ([] !== $scanDirs || [] !== $includeFiles) {
                 $extensions[$packageName] = [
                     'dirs' => $scanDirs,
                     'includes' => $includeFiles,
@@ -160,7 +160,7 @@ final class ComposerTypeDiscovery
      *     extra: array<string, mixed>,
      * } $package
      *
-     * @return string[] list of directories with paths relative to project root.
+     * @return string[] list of directories with paths relative to project root
      */
     private function extractScanDirs(array $package, string $packageName): array
     {
@@ -225,7 +225,7 @@ final class ComposerTypeDiscovery
      *     extra: array<string, mixed>,
      * } $package
      *
-     * @return string[] list of files with paths relative to project root.
+     * @return string[] list of files with paths relative to project root
      */
     private function extractIncludeFiles(array $package, string $packageName): array
     {

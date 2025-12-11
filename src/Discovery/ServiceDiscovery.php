@@ -25,10 +25,9 @@ final class ServiceDiscovery
      * Pre-register all discovered services in the container.
      * Call this BEFORE container->compile().
      *
-     *
      * @param array<string, array{dirs: string[], includes: string[]}> $extensions
      */
-    public function registerServices(Discoverer $discoverer, ContainerBuilder $container, string $basePath, array $extensions,): void
+    public function registerServices(Discoverer $discoverer, ContainerBuilder $container, string $basePath, array $extensions): void
     {
         foreach ($extensions as $data) {
             $discoveryState = $discoverer->discover($basePath, $data['dirs']);

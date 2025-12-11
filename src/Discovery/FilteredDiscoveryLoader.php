@@ -26,7 +26,7 @@ final class FilteredDiscoveryLoader implements LoaderInterface
 {
     /**
      * @param array<string, array{dirs: string[],includes: string[]}> $extensions
-     * @param array<string, array<string, array{enabled: bool}>> $disabledFeatures
+     * @param array<string, array<string, array{enabled: bool}>>      $disabledFeatures
      */
     public function __construct(
         private string $basePath,
@@ -36,7 +36,6 @@ final class FilteredDiscoveryLoader implements LoaderInterface
         private LoggerInterface $logger,
     ) {
     }
-
 
     public function load(RegistryInterface $registry): void
     {

@@ -45,6 +45,7 @@ class Helper
      *   // ...
      * }
      * ```
+     *
      * @param array<string, list<string>> $extensions
      */
     public static function mateDisableFeatures(ContainerConfigurator $container, array $extensions): void
@@ -58,5 +59,4 @@ class Helper
 
         $container->parameters()->set('mate.disabled_features', $data);
     }
-
 }
