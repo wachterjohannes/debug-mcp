@@ -11,18 +11,18 @@
 
 namespace Symfony\AI\Mate\Command;
 
+use Mcp\Capability\Discovery\Discoverer;
 use Mcp\Server;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StdioTransport;
 use Psr\Log\LoggerInterface;
-use Symfony\AI\Mate\Container\FilteredDiscoveryLoader;
 use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
-use Symfony\AI\Mate\Model\ExtensionFilter;
+use Symfony\AI\Mate\Discovery\FilteredDiscoveryLoader;
+use Symfony\AI\Mate\Discovery\ServiceDiscovery;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\Dotenv\Dotenv;
 
 /**
  * Start the MCP server.
@@ -54,37 +54,29 @@ class ServeCommand extends Command
         $cacheDir = $this->container->getParameter('mate.cache_dir');
         \assert(\is_string($cacheDir));
 
-        $envFile = $this->container->getParameter('mate.env_file');
-
-        // 0. Discover extensions with their filters and service files
+        // Pre-register discovered services in the container (before compilation)
+        $discovery = new Discoverer($this->logger);
         $extensions = $this->getExtensionsToLoad();
+        (new ServiceDiscovery())->registerServices($discovery, $this->container, $rootDir, $extensions);
 
-        // 1. Load environment variables from .env files
-        if (null !== $envFile && \is_string($envFile)) {
-            $extra = [];
-            $localFile = $rootDir.\DIRECTORY_SEPARATOR.$envFile.\DIRECTORY_SEPARATOR.'.local';
-            if (!file_exists($localFile)) {
-                $extra[] = $localFile;
-            }
-            (new Dotenv())->load($rootDir.\DIRECTORY_SEPARATOR.$envFile, ...$extra);
-        }
 
-        // 2. Create filtered discovery loader
+        $disabledVendorFeatures = $this->container->getParameter('mate.disabled_features') ?? [];
+        \assert(\is_array($disabledVendorFeatures));
+        /** @var array<string, array<string, array{enabled: bool}>> $disabledVendorFeatures */
+
+        // Compile the container (resolves parameters and validates)
+        $this->container->compile();
+
+        // Create loader to discover services from vendors
         $loader = new FilteredDiscoveryLoader(
             basePath: $rootDir,
             extensions: $extensions,
-            excludeDirs: [],
-            logger: $this->logger,
-            container: $this->container,
+            disabledFeatures: $disabledVendorFeatures,
+            discoverer: $discovery,
+            logger: $this->logger
         );
 
-        // 3. Pre-register discovered services in the container (before compilation)
-        $loader->registerServices();
-
-        // 4. Compile the container (resolves parameters and validates)
-        $this->container->compile();
-
-        // 5. Build and run MCP server
+        // Build and run MCP server
         $server = Server::builder()
             ->setServerInfo('ai-mate', '0.1.0', 'Symfony AI development assistant MCP server')
             ->setContainer($this->container)
@@ -103,27 +95,27 @@ class ServeCommand extends Command
     /**
      * Get all extensions to load with their scan directories and filters.
      *
-     * @return array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}>
+     * @return array<string, array{dirs: string[], includes: string[]}>
      */
     private function getExtensionsToLoad(): array
     {
         $rootDir = $this->container->getParameter('mate.root_dir');
         \assert(\is_string($rootDir));
 
-        $enabledExtensions = $this->container->getParameter('mate.enabled_extensions');
-        \assert(\is_array($enabledExtensions));
-        /** @var array<int, string> $enabledExtensions */
+        $packageNames = $this->container->getParameter('mate.enabled_extensions');
+        \assert(\is_array($packageNames));
+        /** @var array<int, string> $packageNames */
         $scanDirs = $this->container->getParameter('mate.scan_dirs');
         \assert(\is_array($scanDirs));
 
         $extensions = [];
 
-        // 1. Discover Composer-based extensions (with whitelist and filters)
-        foreach ($this->discovery->discover($enabledExtensions) as $packageName => $data) {
+        // Discover enabled Composer-based extensions
+        foreach ($this->discovery->discover($packageNames) as $packageName => $data) {
             $extensions[$packageName] = $data;
         }
 
-        // 2. Add custom scan directories from configuration
+        // Add custom scan directories from the configuration
         $customDirs = [];
         foreach ($scanDirs as $dir) {
             if (\is_string($dir)) {
@@ -137,18 +129,9 @@ class ServeCommand extends Command
         if ([] !== $customDirs) {
             $extensions['_custom'] = [
                 'dirs' => $customDirs,
-                'filter' => ExtensionFilter::all(),
                 'includes' => [],
             ];
         }
-
-        // 3. Always include local mate/ directory (trusted project code)
-        $mateDir = substr(\dirname(__DIR__, 2).'/mate', \strlen($rootDir));
-        $extensions['_local'] = [
-            'dirs' => [$mateDir],
-            'filter' => ExtensionFilter::all(),
-            'includes' => [],
-        ];
 
         return $extensions;
     }

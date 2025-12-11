@@ -43,30 +43,17 @@ class InitCommand extends Command
             mkdir($mateDir, 0755, true);
         }
 
-        // Create extensions.php
-        $extensionsFile = $mateDir.'/extensions.php';
-        if (file_exists($extensionsFile)) {
-            if ($io->confirm('extensions.php already exists. Overwrite? (y/n)', false)) {
-                unlink($extensionsFile);
-                $this->copyTemplate('extensions.php', $extensionsFile);
-                $io->success(\sprintf('Wrote %s', $extensionsFile));
+        $files = ['extensions.php', 'services.php', '.gitignore'];
+        foreach ($files as $file) {
+            $fullPath = $mateDir.'/extensions.php';
+            if (!file_exists($fullPath)) {
+                $this->copyTemplate($file, $fullPath);
+                $io->success(\sprintf('Wrote %s', $fullPath));
+            } elseif ($io->confirm(\sprintf('%s already exists. Overwrite? (y/n)', $fullPath), false)) {
+                unlink($fullPath);
+                $this->copyTemplate($file, $fullPath);
+                $io->success(\sprintf('Wrote %s', $fullPath));
             }
-        } else {
-            $this->copyTemplate('extensions.php', $extensionsFile);
-            $io->success(\sprintf('Wrote %s', $extensionsFile));
-        }
-
-        // Create services.php
-        $servicesFile = $mateDir.'/services.php';
-        if (file_exists($servicesFile)) {
-            if ($io->confirm('services.php already exists. Overwrite? (y/n)', false)) {
-                unlink($servicesFile);
-                $this->copyTemplate('services.php', $servicesFile);
-                $io->success(\sprintf('Wrote %s', $servicesFile));
-            }
-        } else {
-            $this->copyTemplate('services.php', $servicesFile);
-            $io->success(\sprintf('Wrote %s', $servicesFile));
         }
 
         $io->note('Please run "vendor/bin/mate discover" to find MCP features in your vendors folder');
