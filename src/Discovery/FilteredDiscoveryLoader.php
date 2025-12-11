@@ -9,61 +9,34 @@
  * file that was distributed with this source code.
  */
 
-namespace Symfony\AI\Mate\Container;
+namespace Symfony\AI\Mate\Discovery;
 
 use Mcp\Capability\Discovery\Discoverer;
 use Mcp\Capability\Discovery\DiscoveryState;
 use Mcp\Capability\Registry\Loader\LoaderInterface;
 use Mcp\Capability\RegistryInterface;
 use Psr\Log\LoggerInterface;
-use Symfony\AI\Mate\Model\ExtensionFilter;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
- * Discovery loader that filters capabilities based on plugin configuration
- * and registers discovered classes in the Symfony DI container.
+ * Create loaded that automatically discover MCP features.
  *
  * @author Johannes Wachter <johannes@sulu.io>
  */
 final class FilteredDiscoveryLoader implements LoaderInterface
 {
     /**
-     * @param array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}> $extensions
+     * @param array<string, array{dirs: string[],includes: string[]}> $extensions
+     * @param array<string, array<string, array{enabled: bool}>> $disabledFeatures
      */
     public function __construct(
         private string $basePath,
         private array $extensions,
+        private array $disabledFeatures,
+        private Discoverer $discoverer,
         private LoggerInterface $logger,
-        private ContainerBuilder $container,
     ) {
     }
 
-    /**
-     * Pre-register all discovered services in the container.
-     * Call this BEFORE container->compile().
-     */
-    public function registerServices(): void
-    {
-        foreach ($this->extensions as $data) {
-            $discoveryState = $this->discoverCapabilities($data['dirs']);
-
-            foreach ($discoveryState->getTools() as $tool) {
-                $this->maybeRegisterHandler($tool->handler);
-            }
-
-            foreach ($discoveryState->getResources() as $resource) {
-                $this->maybeRegisterHandler($resource->handler);
-            }
-
-            foreach ($discoveryState->getPrompts() as $prompt) {
-                $this->maybeRegisterHandler($prompt->handler);
-            }
-
-            foreach ($discoveryState->getResourceTemplates() as $template) {
-                $this->maybeRegisterHandler($template->handler);
-            }
-        }
-    }
 
     public function load(RegistryInterface $registry): void
     {
@@ -73,13 +46,10 @@ final class FilteredDiscoveryLoader implements LoaderInterface
         $allResourceTemplates = [];
 
         foreach ($this->extensions as $packageName => $data) {
-            /** @var ExtensionFilter $filter */
-            $filter = $data['filter']->withDisabledFeatures($packageName);
-
-            $discoveryState = $this->discoverCapabilities($data['dirs']);
+            $discoveryState = $this->discoverer->discover($this->basePath, $data['dirs']);
 
             foreach ($discoveryState->getTools() as $name => $tool) {
-                if (!$filter->allowsFeature('tool', $name)) {
+                if (!$this->isFeatureAllowed($packageName, $name)) {
                     $this->logger->debug('Excluding tool by feature filter', [
                         'package' => $packageName,
                         'tool' => $name,
@@ -91,7 +61,7 @@ final class FilteredDiscoveryLoader implements LoaderInterface
             }
 
             foreach ($discoveryState->getResources() as $uri => $resource) {
-                if (!$filter->allowsFeature('resource', $uri)) {
+                if (!$this->isFeatureAllowed($packageName, $uri)) {
                     $this->logger->debug('Excluding resource by feature filter', [
                         'package' => $packageName,
                         'resource' => $uri,
@@ -103,7 +73,7 @@ final class FilteredDiscoveryLoader implements LoaderInterface
             }
 
             foreach ($discoveryState->getPrompts() as $name => $prompt) {
-                if (!$filter->allowsFeature('prompt', $name)) {
+                if (!$this->isFeatureAllowed($packageName, $name)) {
                     $this->logger->debug('Excluding prompt by feature filter', [
                         'package' => $packageName,
                         'prompt' => $name,
@@ -117,7 +87,7 @@ final class FilteredDiscoveryLoader implements LoaderInterface
             // Filter and collect resource templates
             foreach ($discoveryState->getResourceTemplates() as $uriTemplate => $template) {
                 // Check if a feature is disabled
-                if (!$filter->allowsFeature('resourceTemplate', $uriTemplate)) {
+                if (!$this->isFeatureAllowed($packageName, $uriTemplate)) {
                     $this->logger->debug('Excluding resource template by feature filter', [
                         'package' => $packageName,
                         'template' => $uriTemplate,
@@ -146,58 +116,10 @@ final class FilteredDiscoveryLoader implements LoaderInterface
         ]);
     }
 
-    /**
-     * @param \Closure|array{0: object|string, 1: string}|string $handler
-     */
-    private function maybeRegisterHandler(\Closure|array|string $handler): void
+    private function isFeatureAllowed(string $packageName, string $feature): bool
     {
-        $className = $this->extractClassName($handler);
-        if (null === $className) {
-            return;
-        }
+        $data = $this->disabledFeatures[$packageName][$feature] ?? [];
 
-        $this->registerService($className);
-    }
-
-    /**
-     * @param string[] $scanDirs
-     */
-    private function discoverCapabilities(array $scanDirs): DiscoveryState
-    {
-        $discoverer = new Discoverer($this->logger);
-
-        return $discoverer->discover($this->basePath, $scanDirs);
-    }
-
-    /**
-     * @param \Closure|array{0: object|string, 1: string}|string $handler
-     */
-    private function extractClassName(\Closure|array|string $handler): ?string
-    {
-        if ($handler instanceof \Closure) {
-            return null;
-        }
-
-        if (\is_string($handler)) {
-            return class_exists($handler) ? $handler : null;
-        }
-
-        $class = $handler[0];
-        if (\is_object($class)) {
-            return $class::class;
-        }
-
-        return class_exists($class) ? $class : null;
-    }
-
-    private function registerService(string $className): void
-    {
-        if ($this->container->has($className)) {
-            return;
-        }
-
-        $this->container->register($className, $className)
-            ->setAutowired(true)
-            ->setPublic(true);
+        return $data['enabled'] ?? true;
     }
 }

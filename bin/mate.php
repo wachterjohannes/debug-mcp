@@ -33,8 +33,6 @@ $_ENV['MATE_ROOT_DIR'] = $root;
 use Symfony\AI\Mate\App;
 use Symfony\AI\Mate\Container\ContainerFactory;
 
-require_once dirname(__DIR__).'/src/Helper/functions.php';
-
 $containerFactory = new ContainerFactory($root);
 $container = $containerFactory->create();
 

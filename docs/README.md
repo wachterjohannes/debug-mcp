@@ -78,9 +78,21 @@ return [
 <?php
 // .mate/services.php
 
-// Disable specific features from extensions
-mateDisableFeature('vendor/package', 'tool', 'unwanted-tool');
-mateDisableFeature('vendor/package', 'resource', 'unwanted-resource');
+use Symfony\Component\DependencyInjection\Loader\Configurator\ContainerConfigurator;
+
+return static function (ContainerConfigurator $container): void {
+    $container->parameters()
+        // Override default parameters here
+        // ->set('mate.cache_dir', sys_get_temp_dir().'/mate')
+        // ->set('mate.scan_dirs', ['mate'])
+        // ->set('mate.env_file', ['.env']) // This will load .mate/.env and .mate/.env.local
+    ;
+
+    $container->services()
+        // Register your custom services here
+    ;
+};
+
 mateDisableFeature('vendor/package', 'prompt', 'unwanted-prompt');
 mateDisableFeature('vendor/package', 'resourceTemplate', 'unwanted-template');
 ```

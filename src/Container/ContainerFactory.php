@@ -13,7 +13,6 @@ namespace Symfony\AI\Mate\Container;
 
 use Psr\Log\LoggerInterface;
 use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
-use Symfony\AI\Mate\Model\ExtensionFilter;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Loader\PhpFileLoader;

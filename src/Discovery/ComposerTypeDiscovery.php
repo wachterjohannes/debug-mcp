@@ -12,7 +12,6 @@
 namespace Symfony\AI\Mate\Discovery;
 
 use Psr\Log\LoggerInterface;
-use Symfony\AI\Mate\Model\ExtensionFilter;
 
 /**
  * Discovers MCP extensions via extra.ai-mate config in composer.json.
@@ -46,7 +45,7 @@ final class ComposerTypeDiscovery
     /**
      * @param string[] $enabledExtensions
      *
-     * @return array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}>
+     * @return array<string, array{dirs: string[], includes: string[]}>
      */
     public function discover(array $enabledExtensions = []): array
     {
@@ -64,17 +63,16 @@ final class ComposerTypeDiscovery
 
             // Check if the package is enabled
             if ([] !== $enabledExtensions && !\in_array($packageName, $enabledExtensions, true)) {
-                $this->logger->debug('Skipping non-whitelisted extension', ['package' => $packageName]);
+                $this->logger->debug('Skipping package not enabled', ['package' => $packageName]);
 
                 continue;
             }
 
             $scanDirs = $this->extractScanDirs($package, $packageName);
-            if ([] !== $scanDirs) {
-                $includeFiles = $this->extractIncludeFiles($package, $packageName);
+            $includeFiles = $this->extractIncludeFiles($package, $packageName);
+            if ([] !== $scanDirs || $includeFiles !== []) {
                 $extensions[$packageName] = [
                     'dirs' => $scanDirs,
-                    'filter' => ExtensionFilter::all(),
                     'includes' => $includeFiles,
                 ];
             }

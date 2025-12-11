@@ -11,18 +11,18 @@
 
 namespace Symfony\AI\Mate\Command;
 
+use Mcp\Capability\Discovery\Discoverer;
 use Mcp\Server;
 use Mcp\Server\Session\FileSessionStore;
 use Mcp\Server\Transport\StdioTransport;
 use Psr\Log\LoggerInterface;
-use Symfony\AI\Mate\Container\FilteredDiscoveryLoader;
 use Symfony\AI\Mate\Discovery\ComposerTypeDiscovery;
-use Symfony\AI\Mate\Model\ExtensionFilter;
+use Symfony\AI\Mate\Discovery\FilteredDiscoveryLoader;
+use Symfony\AI\Mate\Discovery\ServiceDiscovery;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\Dotenv\Dotenv;
 
 /**
  * Start the MCP server.
@@ -54,21 +54,27 @@ class ServeCommand extends Command
         $cacheDir = $this->container->getParameter('mate.cache_dir');
         \assert(\is_string($cacheDir));
 
-        // Create filtered discovery loader
-        $loader = new FilteredDiscoveryLoader(
-            basePath: $rootDir,
-            extensions: $this->getExtensionsToLoad(),
-            logger: $this->logger,
-            container: $this->container,
-        );
 
         // Pre-register discovered services in the container (before compilation)
-        $loader->registerServices();
+        $discovery = new Discoverer($this->logger);
+        $extensions = $this->getExtensionsToLoad();
+        (new ServiceDiscovery())->registerServices($discovery, $this->container, $rootDir, $extensions);
 
-        // 4. Compile the container (resolves parameters and validates)
+        $disabledVendorFeatures = $this->container->getParameter('mate.disabled_features') ?? [];
+
+        // Compile the container (resolves parameters and validates)
         $this->container->compile();
 
-        // 5. Build and run MCP server
+        // Create loader to discover services from vendors
+        $loader = new FilteredDiscoveryLoader(
+            basePath: $rootDir,
+            extensions: $extensions,
+            disabledFeatures: $disabledVendorFeatures,
+            discoverer: $discovery,
+            logger: $this->logger
+        );
+
+        // Build and run MCP server
         $server = Server::builder()
             ->setServerInfo('ai-mate', '0.1.0', 'Symfony AI development assistant MCP server')
             ->setContainer($this->container)
@@ -87,7 +93,7 @@ class ServeCommand extends Command
     /**
      * Get all extensions to load with their scan directories and filters.
      *
-     * @return array<string, array{dirs: string[], filter: ExtensionFilter, includes: string[]}>
+     * @return array<string, array{dirs: string[], includes: string[]}>
      */
     private function getExtensionsToLoad(): array
     {
@@ -103,7 +109,7 @@ class ServeCommand extends Command
 
         $extensions = [];
 
-        // Discover Composer-based extensions (with whitelist and filters)
+        // Discover enabled Composer-based extensions
         foreach ($this->discovery->discover($packageNames) as $packageName => $data) {
             $extensions[$packageName] = $data;
         }
@@ -122,7 +128,6 @@ class ServeCommand extends Command
         if ([] !== $customDirs) {
             $extensions['_custom'] = [
                 'dirs' => $customDirs,
-                'filter' => ExtensionFilter::all(),
                 'includes' => [],
             ];
         }
