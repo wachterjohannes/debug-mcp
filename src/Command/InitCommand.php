@@ -37,26 +37,62 @@ class InitCommand extends Command
     {
         $io = new SymfonyStyle($input, $output);
 
-        $mateDir = $this->rootDir.'/.mate';
+        $io->title('AI Mate Initialization');
+        $io->text('Setting up AI Mate configuration and directory structure...');
+        $io->newLine();
 
+        $mateDir = $this->rootDir.'/.mate';
+        $actions = [];
+
+        // Create .mate directory
         if (!is_dir($mateDir)) {
             mkdir($mateDir, 0755, true);
+            $actions[] = ['✓', 'Created', '.mate/ directory'];
         }
 
+        // Copy configuration files
         $files = ['extensions.php', 'services.php', '.gitignore'];
         foreach ($files as $file) {
-            $fullPath = $mateDir.'/extensions.php';
+            $fullPath = $mateDir.'/'.$file;
             if (!file_exists($fullPath)) {
                 $this->copyTemplate($file, $fullPath);
-                $io->success(\sprintf('Wrote %s', $fullPath));
-            } elseif ($io->confirm(\sprintf('%s already exists. Overwrite? (y/n)', $fullPath), false)) {
+                $actions[] = ['✓', 'Created', '.mate/'.$file];
+            } elseif ($io->confirm(\sprintf('<question>%s already exists. Overwrite?</question>', $fullPath), false)) {
                 unlink($fullPath);
                 $this->copyTemplate($file, $fullPath);
-                $io->success(\sprintf('Wrote %s', $fullPath));
+                $actions[] = ['✓', 'Updated', '.mate/'.$file];
+            } else {
+                $actions[] = ['○', 'Skipped', '.mate/'.$file.' (already exists)'];
             }
         }
 
-        $io->note('Please run "vendor/bin/mate discover" to find MCP features in your vendors folder');
+        // Create mate directory with .gitignore
+        $mateUserDir = $this->rootDir.'/mate';
+        if (!is_dir($mateUserDir)) {
+            mkdir($mateUserDir, 0755, true);
+            file_put_contents($mateUserDir.'/.gitignore', '');
+            $actions[] = ['✓', 'Created', 'mate/ directory (for custom extensions)'];
+        } else {
+            $actions[] = ['○', 'Exists', 'mate/ directory'];
+        }
+
+        // Update composer.json
+        $composerActions = $this->updateComposerJson();
+        $actions = array_merge($actions, $composerActions);
+
+        // Display summary
+        $io->section('Summary');
+        $io->table(['', 'Action', 'Item'], $actions);
+
+        $io->success('AI Mate initialization complete!');
+
+        $io->comment([
+            'Next steps:',
+            '  1. Run "composer dump-autoload" to update the autoloader',
+            '  2. Run "vendor/bin/mate discover" to find MCP extensions',
+            '  3. Add your custom MCP tools/resources/prompts to the mate/ directory',
+            '  4. Run "vendor/bin/mate serve" to start the MCP server',
+        ]);
 
         return Command::SUCCESS;
     }
@@ -64,5 +100,73 @@ class InitCommand extends Command
     private function copyTemplate(string $template, string $destination): void
     {
         copy(__DIR__.'/../../resources/'.$template, $destination);
+    }
+
+    /**
+     * @return list<array{string, string, string}>
+     */
+    private function updateComposerJson(): array
+    {
+        $composerJsonPath = $this->rootDir.'/composer.json';
+        $actions = [];
+
+        if (!file_exists($composerJsonPath)) {
+            $actions[] = ['⚠', 'Warning', 'composer.json not found in project root'];
+
+            return $actions;
+        }
+
+        $composerContent = file_get_contents($composerJsonPath);
+        if (false === $composerContent) {
+            $actions[] = ['✗', 'Error', 'Failed to read composer.json'];
+
+            return $actions;
+        }
+
+        $composerJson = json_decode($composerContent, true);
+
+        if (\JSON_ERROR_NONE !== json_last_error() || !\is_array($composerJson)) {
+            $actions[] = ['✗', 'Error', 'Failed to parse composer.json: '.json_last_error_msg()];
+
+            return $actions;
+        }
+
+        $modified = false;
+
+        // Initialize nested arrays if needed
+        $composerJson['extra'] = \is_array($composerJson['extra'] ?? null) ? $composerJson['extra'] : [];
+        $composerJson['autoload'] = \is_array($composerJson['autoload'] ?? null) ? $composerJson['autoload'] : [];
+        $composerJson['autoload']['psr-4'] = \is_array($composerJson['autoload']['psr-4'] ?? null) ? $composerJson['autoload']['psr-4'] : [];
+
+        // Add extra.ai-mate configuration
+        if (!isset($composerJson['extra']['ai-mate'])) {
+            $composerJson['extra']['ai-mate'] = [
+                'scan-dirs' => ['mate'],
+                'includes' => ['services.php'],
+            ];
+            $modified = true;
+            $actions[] = ['✓', 'Added', 'extra.ai-mate configuration'];
+        } else {
+            $actions[] = ['○', 'Exists', 'extra.ai-mate configuration'];
+        }
+
+        // Add autoloader for mate directory
+        if (!isset($composerJson['autoload']['psr-4']['App\\Mate\\'])) {
+            $composerJson['autoload']['psr-4']['App\\Mate\\'] = 'mate/';
+            $modified = true;
+            $actions[] = ['✓', 'Added', 'App\\Mate\\ autoloader'];
+        } else {
+            $actions[] = ['○', 'Exists', 'App\\Mate\\ autoloader'];
+        }
+
+        if ($modified) {
+            file_put_contents(
+                $composerJsonPath,
+                json_encode($composerJson, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES)."\n"
+            );
+            $actions[] = ['✓', 'Updated', 'composer.json'];
+        }
+
+        return $actions;
     }
 }

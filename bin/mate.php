@@ -9,7 +9,8 @@ declare(strict_types=1);
  */
 
 $autoloadPaths = [
-    __DIR__ . '/../../../autoload.php',  // Project autoloader (preferred)
+    getcwd() . '/vendor/autoload.php',  // Project autoloader using current-working-directory (preferred)
+    __DIR__ . '/../../../autoload.php',  // Project autoloader
     __DIR__ . '/../vendor/autoload.php', // Package autoloader (fallback)
 ];
 

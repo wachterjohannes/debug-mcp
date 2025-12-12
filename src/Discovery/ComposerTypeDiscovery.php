@@ -82,6 +82,47 @@ final class ComposerTypeDiscovery
     }
 
     /**
+     * @return array{dirs: array<string>, includes: array<string>}
+     */
+    public function discoverRootProject(): array
+    {
+        $composerContent = file_get_contents($this->rootDir.'/composer.json');
+        if (false === $composerContent) {
+            return [
+                'dirs' => [],
+                'includes' => [],
+            ];
+        }
+
+        $rootComposer = json_decode($composerContent, true);
+        if (!\is_array($rootComposer)) {
+            return [
+                'dirs' => [],
+                'includes' => [],
+            ];
+        }
+
+        $scanDirs = [];
+        if (isset($rootComposer['extra']) && \is_array($rootComposer['extra'])
+            && isset($rootComposer['extra']['ai-mate']) && \is_array($rootComposer['extra']['ai-mate'])
+            && isset($rootComposer['extra']['ai-mate']['scan-dirs']) && \is_array($rootComposer['extra']['ai-mate']['scan-dirs'])) {
+            $scanDirs = array_filter($rootComposer['extra']['ai-mate']['scan-dirs'], 'is_string');
+        }
+
+        $includes = [];
+        if (isset($rootComposer['extra']) && \is_array($rootComposer['extra'])
+            && isset($rootComposer['extra']['ai-mate']) && \is_array($rootComposer['extra']['ai-mate'])
+            && isset($rootComposer['extra']['ai-mate']['includes']) && \is_array($rootComposer['extra']['ai-mate']['includes'])) {
+            $includes = array_filter($rootComposer['extra']['ai-mate']['includes'], 'is_string');
+        }
+
+        return [
+            'dirs' => array_values($scanDirs),
+            'includes' => array_values($includes),
+        ];
+    }
+
+    /**
      * Check vendor/composer/installed.json for installed packages.
      *
      * @return array<string, array{
@@ -253,8 +294,8 @@ final class ComposerTypeDiscovery
                 continue;
             }
 
-            $fullPath = '/vendor/'.$packageName.'/'.ltrim($file, '/');
-            if (!file_exists($this->rootDir.$fullPath)) {
+            $fullPath = $this->rootDir.'/vendor/'.$packageName.'/'.ltrim($file, '/');
+            if (!file_exists($fullPath)) {
                 $this->logger->warning('Include file does not exist', [
                     'package' => $packageName,
                     'file' => $fullPath,

@@ -67,8 +67,10 @@
             "name": "symfony/ai",
             "url": "https://github.com/symfony/ai"
         },
-        "symfony/ai-mate": {
-            "classes": []
+        "ai-mate": {
+            "scan-dirs": [
+                "src/Capability"
+            ]
         }
     }
 }

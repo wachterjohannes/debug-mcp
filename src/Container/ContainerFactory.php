@@ -44,19 +44,21 @@ final class ContainerFactory
         $container->setParameter('mate.enabled_extensions', $enabledExtensions);
         $container->setParameter('mate.root_dir', $this->rootDir);
 
+        $logger = $container->get(LoggerInterface::class);
+        \assert($logger instanceof LoggerInterface);
+
+        $discovery = new ComposerTypeDiscovery($this->rootDir, $logger);
+
         // Discover extensions and load their services
         if ([] !== $enabledExtensions) {
-            $logger = $container->get(LoggerInterface::class);
-            \assert($logger instanceof LoggerInterface);
-
-            $discovery = new ComposerTypeDiscovery($this->rootDir, $logger);
             foreach ($discovery->discover($enabledExtensions) as $packageName => $data) {
                 $this->loadExtensionIncludes($container, $logger, $packageName, $data['includes']);
             }
         }
 
         // Load user services last (so they can override extension configs and access parameters)
-        $this->loadUserServices($container);
+        $rootProject = $discovery->discoverRootProject();
+        $this->loadUserServices($rootProject, $container);
 
         // Load environment variables if configured
         $this->loadUserEnvVar($container);
@@ -139,28 +141,28 @@ final class ContainerFactory
         (new Dotenv())->load($this->rootDir.\DIRECTORY_SEPARATOR.$envFile, ...$extra);
     }
 
-    private function loadUserServices(ContainerBuilder $container): void
+    /**
+     * @param array{dirs: array<string>, includes: array<string>} $rootProject
+     */
+    private function loadUserServices(array $rootProject, ContainerBuilder $container): void
     {
-        $userServicesFile = $this->rootDir.'/.mate/services.php';
-        if (!file_exists($userServicesFile)) {
-            return;
-        }
-
         $logger = $container->get(LoggerInterface::class);
         \assert($logger instanceof LoggerInterface);
 
-        try {
-            $loader = new PhpFileLoader($container, new FileLocator($this->rootDir.'/.mate'));
-            $loader->load('services.php');
+        $loader = new PhpFileLoader($container, new FileLocator($this->rootDir.'/.mate'));
+        foreach ($rootProject['includes'] as $include) {
+            try {
+                $loader->load($include);
 
-            $logger->debug('Loaded user services', [
-                'file' => $userServicesFile,
-            ]);
-        } catch (\Throwable $e) {
-            $logger->warning('Failed to load user services', [
-                'file' => $userServicesFile,
-                'error' => $e->getMessage(),
-            ]);
+                $logger->debug('Loaded user services', [
+                    'file' => $include,
+                ]);
+            } catch (\Throwable $e) {
+                $logger->warning('Failed to load user services', [
+                    'file' => $include,
+                    'error' => $e->getMessage(),
+                ]);
+            }
         }
     }
 }
