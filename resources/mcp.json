@@ -1,6 +1,6 @@
 {
     "mcpServers": {
-        "symfony-mate": {
+        "symfony-ai-mate": {
             "command": "./vendor/bin/mate",
             "args": [
                 "serve"
