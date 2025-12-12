@@ -41,28 +41,28 @@ class InitCommand extends Command
         $io->text('Setting up AI Mate configuration and directory structure...');
         $io->newLine();
 
-        $mateDir = $this->rootDir.'/.mate';
         $actions = [];
 
         // Create .mate directory
+        $mateDir = $this->rootDir.'/.mate';
         if (!is_dir($mateDir)) {
             mkdir($mateDir, 0755, true);
             $actions[] = ['✓', 'Created', '.mate/ directory'];
         }
 
         // Copy configuration files
-        $files = ['extensions.php', 'services.php', '.gitignore'];
+        $files = ['.mate/extensions.php', '.mate/services.php', '.mate/.gitignore', 'mcp.json'];
         foreach ($files as $file) {
-            $fullPath = $mateDir.'/'.$file;
+            $fullPath = $this->rootDir.'/'.$file;
             if (!file_exists($fullPath)) {
                 $this->copyTemplate($file, $fullPath);
-                $actions[] = ['✓', 'Created', '.mate/'.$file];
+                $actions[] = ['✓', 'Created', $file];
             } elseif ($io->confirm(\sprintf('<question>%s already exists. Overwrite?</question>', $fullPath), false)) {
                 unlink($fullPath);
                 $this->copyTemplate($file, $fullPath);
-                $actions[] = ['✓', 'Updated', '.mate/'.$file];
+                $actions[] = ['✓', 'Updated', $file];
             } else {
-                $actions[] = ['○', 'Skipped', '.mate/'.$file.' (already exists)'];
+                $actions[] = ['○', 'Skipped', $file.' (already exists)'];
             }
         }
 
